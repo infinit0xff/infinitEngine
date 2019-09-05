@@ -34,6 +34,12 @@ infinitEngine.Core = (function() {
         }
     }
 
+    // clears draw area
+    var clearCanvas = function(color) {
+        ivGL.clearColor(color[0], color[1], color[2], color[3]);
+        ivGL.clear(ivGL.COLOR_BUFFER_BIT);
+    };
+
     // contains accessible functions and vars
     var ivPublic = {
         getGL: getGL
