@@ -51,4 +51,4 @@ infinitEngine.Core = (function() {
     };
 
     return ivPublic;
-}()); // create single instance of gEngine.Core
+}()); // create single instance of infinitEngine.Core
