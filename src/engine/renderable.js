@@ -6,9 +6,10 @@ function Renderable(shader) {
     this.ivColor = [1, 1, 1, 1];
 }
 
-Renderable.prototype.draw = function() {
+Renderable.prototype.draw = function(modelTranform) {
     var gl = infinitEngine.Core.getGL();
     this.ivShader.activateShader(this.ivColor);
+    this.ivShader.loadObjectTransform(modelTranform);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
 
