@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>InfinitEngine</title>
 </head>
-<body>
+<body onload="new Demo('GLCanvas');">
     
     <script type="x-shader/x-vertex" id="VertexShader">
         attribute vec3 aSquareVertexPosition;
@@ -24,6 +24,9 @@
     <script type="text/javascript" src="src/engine/engine_core.js"></script>
     <script type="text/javascript" src="src/engine/vertex_buffer.js"></script>
     <script type="text/javascript" src="src/engine/simple_shader.js"></script>
+
+    <!-- client -->
+    <script type="text/javascript" src="src/demo/demo.js"></script>
 
 </body>
 </html>
