@@ -7,16 +7,23 @@ function Demo(htmlCanvasID) {
     infinitEngine.Core.initializeWebGL(htmlCanvasID);
     
     // create, load and compile shader 
-    this.ivShader = new SimpleShader(
+    this.ivConstColorShader = new SimpleShader(
         "src/glsl_shaders/simple_vs.glsl",
         "src/glsl_shaders/simple_fs.glsl"
     );
     
-    // clear the canvas
-    infinitEngine.Core.clearCanvas([0, 0.8, 0, 1]);
+    // create Renderable objects
+    this.ivRedSq = new Renderable(this.ivConstColorShader);
+    this.ivRedSq.setColor([0.8, 0.2, 0.2, 1]);
+    this.ivBlueSq = new Renderable(this.ivConstColorShader);
+    this.ivBlueSq.setColor([0.2, 0.4, 0.8, 1]);
 
-    // activate proper shader
-    this.ivShader.activateShader([0, 0, 1, 1]);
+    // clear the canvas
+    infinitEngine.Core.clearCanvas([0.1, 0.8, 0.2, 1]);
+    
+    // draw    
+    this.ivRedSq.draw();
+    // this.ivBlueSq.draw();
 
     // draw with activated geometry and shader
     var gl = infinitEngine.Core.getGL();
