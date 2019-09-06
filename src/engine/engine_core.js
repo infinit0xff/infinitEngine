@@ -32,8 +32,11 @@ infinitEngine.Core = (function() {
             document.write("<br><b>WebGL not supported!</b>");
             return;
         }
-    }
 
+        // initialize vertex buffer
+        infinitEngine.VertexBuffer.initialize();
+    };
+    
     // clears draw area
     var clearCanvas = function(color) {
         ivGL.clearColor(color[0], color[1], color[2], color[3]);
@@ -42,7 +45,9 @@ infinitEngine.Core = (function() {
 
     // contains accessible functions and vars
     var ivPublic = {
-        getGL: getGL
+        getGL: getGL,
+        initializeWebGL: initializeWebGL,
+        clearCanvas: clearCanvas
     };
 
     return ivPublic;
