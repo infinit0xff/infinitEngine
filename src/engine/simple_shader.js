@@ -41,13 +41,29 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
 }
 
 // return a compiled shader from a shader in the DOM
-SimpleShader.prototype._loadAndCompileShader = function(id, shaderType) {
-    var shaderText, shaderSource, compiledShader;
+SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
+    var xmlReq, shaderSource = null, compiledShader = null;
     var gl = infinitEngine.Core.getGL();
 
     // get shader source from index.html
-    shaderText = document.getElementById(id);
-    shaderSource = shaderText.firstChild.textContent;
+    // shaderText = document.getElementById(id);
+    // shaderSource = shaderText.firstChild.textContent;
+    
+    xmlReq = new XMLHttpRequest();
+    xmlReq.open('GET', filePath, false);
+    try {
+        xmlReq.send();
+    } catch (error) {
+        alert("Failed to load shader: " + filepath);
+        return null;
+    }
+    
+    shaderSource = xmlReq.responseText;
+
+    if (shaderSource === null) {
+        alert("WARNING: Loading of: " + filePath + " Failed!");
+        return null;
+    }
 
     // create shader of shader type vertex or fragment
     compiledShader = gl.createShader(shaderType);
