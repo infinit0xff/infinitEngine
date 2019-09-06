@@ -20,10 +20,24 @@ function Demo(htmlCanvasID) {
 
     // clear the canvas
     infinitEngine.Core.clearCanvas([0.1, 0.8, 0.2, 1]);
+
+    // create new indentity transform
+    var xform = mat4.create();
     
-    // draw    
-    this.ivRedSq.draw();
-    // this.ivBlueSq.draw();
+    // compute red transform operator
+    mat4.translate(xform, xform, vec3.fromValues(-0.25, 0.25, 0.0));
+    mat4.rotateZ(xform, xform, 0.2);
+    mat4.scale(xform, xform, vec3.fromValues(1.2, 1.2, 1.0));
+    this.ivRedSq.draw(xform);
+
+    // restart
+    mat4.identity(xform);
+
+    // compute blue transform operator
+    mat4.translate(xform, xform, vec3.fromValues(-0.25, 0.25, 0.0));
+    mat4.rotateZ(xform, xform, -0.785);
+    mat4.scale(xform, xform, vec3.fromValues(0.4, 0.4, 1.0));
+    this.ivBlueSq.draw(xform);
 
     // draw with activated geometry and shader
     var gl = infinitEngine.Core.getGL();
