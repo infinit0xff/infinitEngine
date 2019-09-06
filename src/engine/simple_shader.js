@@ -5,6 +5,9 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     // reference to pixelColor fragment shader
     this.ivPixelColor = null;
 
+    // reference to uModelTransform
+    this.uModelTransform = null;
+
     // reference compiled shader webgl context
     this.ivSharedVertexPositionAttribute = null;
 
@@ -43,7 +46,8 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
         0);
     
     this.ivPixelColor = gl.getUniformLocation(this.ivCompiledShader, "uPixelColor");
-
+    this.ivModelTransform = gl.getUniformLocation(this.ivCompiledShader,
+        "uModelTransform");
 }
 
 // return a compiled shader from a shader in the DOM
@@ -97,3 +101,10 @@ SimpleShader.prototype.activateShader = function(pixelColor) {
 SimpleShader.prototype.getShader = function() {
     return this.ivCompiledShader;
 };
+
+// load per object model transform
+SimpleShader.prototype.loadObjectTransform = function(modelTransform) {
+    var gl = infinitEngine.Core.getGL();
+    gl.uniformMatrix4fv(this.ivModelTransform, false, modelTransform);
+    
+}
