@@ -2,6 +2,9 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     // instance vars
     this.ivCompiledShader = null;
 
+    // reference to pixelColor fragment shader
+    this.ivPixelColor = null;
+
     // reference compiled shader webgl context
     this.ivSharedVertexPositionAttribute = null;
 
@@ -38,6 +41,9 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
         false,
         0,
         0);
+    
+    this.ivPixelColor = gl.getUniformLocation(this.ivCompiledShader, "uPixelColor");
+
 }
 
 // return a compiled shader from a shader in the DOM
@@ -80,10 +86,11 @@ SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
 }
 
 // activate shader
-SimpleShader.prototype.activateShader = function() {
+SimpleShader.prototype.activateShader = function(pixelColor) {
     var gl = infinitEngine.Core.getGL();
     gl.useProgram(this.ivCompiledShader);
     gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
+    gl.uniform4fv(this.ivPixelColor, pixelColor);
 };
 
 // accessor for shader
