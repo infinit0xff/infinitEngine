@@ -7,7 +7,10 @@ function Demo(htmlCanvasID) {
     infinitEngine.Core.initializeWebGL(htmlCanvasID);
     
     // create, load and compile shader 
-    this.ivShader = new SimpleShader("VertexShader", "FragmentShader");
+    this.ivShader = new SimpleShader(
+        "src/glsl_shaders/simple_vs.glsl",
+        "src/glsl_shaders/white_fs.glsl"
+    );
     
     // clear the canvas
     infinitEngine.Core.clearCanvas([0, 0.8, 0, 1]);
