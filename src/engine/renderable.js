@@ -1,15 +1,20 @@
+"use strict";
+
 function Renderable(shader) {
     // shader for this object
     this.ivShader = shader;
-    
+    this.ivXform = new Transform();
+
     // fragment shader color
     this.ivColor = [1, 1, 1, 1];
 }
+Renderable.prototype.getXform = function() { return this.ivXform; }
 
-Renderable.prototype.draw = function(modelTranform) {
+Renderable.prototype.draw = function() {
     var gl = infinitEngine.Core.getGL();
     this.ivShader.activateShader(this.ivColor);
-    this.ivShader.loadObjectTransform(modelTranform);
+    // this.ivShader.loadObjectTransform(modelTranform);
+    this.ivShader.loadObjectTransform(this.ivXform.getXform());
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
 
