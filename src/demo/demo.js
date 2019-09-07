@@ -13,7 +13,7 @@ function Demo(htmlCanvasID) {
     this.ivCamera = null;
 
     // initialize webgl context
-    infinitEngine.Core.initializeWebGL(htmlCanvasID);
+    infinitEngine.Core.initializeEngineCore(htmlCanvasID);
     
     // initialize the game
     this.initialize();
@@ -79,17 +79,23 @@ Demo.prototype.update = function() {
     
     // move the blue square
     var blueXform = this.ivBlueSq.getXform();
+    var redXform = this.ivRedSq.getXform();
     var deltaX = 0.05;
     
-    if (blueXform.getXPos() > 30)
-        blueXform.setPosition(10, 60);
-    blueXform.incXPosBy(deltaX);
-    blueXform.incRotationByDegree(1);
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
+        if (blueXform.getXPos() > 30)
+            blueXform.setPosition(10, 60);
+        blueXform.incXPosBy(deltaX);
+    }
 
-    // pulse red square
-    var redXform = this.ivRedSq.getXform();
-    
-    if(redXform.getWidth() > 5)
-        redXform.setSize(2, 2);
-    redXform.incSizeBy(0.05);
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Up)) {
+        blueXform.incRotationByDegree(1);
+    }
+
+
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Down)) {
+        if(redXform.getWidth() > 5)
+            redXform.setSize(2, 2);
+        redXform.incSizeBy(0.05);
+    }
 };
