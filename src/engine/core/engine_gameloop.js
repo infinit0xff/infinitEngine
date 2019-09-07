@@ -34,6 +34,7 @@ infinitEngine.GameLoop = (function() {
             // if lag larget then update frames, update
             // until caught up
             while ((ivLagTime >= KFPS) && ivLoopIsRunning) {
+                infinitEngine.Input.update();
                 this.update(); // call Demo update
                 ivLagTime -= KMPF;
             }

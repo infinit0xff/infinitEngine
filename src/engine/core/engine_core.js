@@ -32,7 +32,7 @@ infinitEngine.Core = (function() {
     var ivGL = getGL();
 
     // initialize webgl, vertex buffer and compile shaders.
-    var initializeWebGL = function(htmlCanvasID) {
+    var _initializeWebGL = function(htmlCanvasID) {
         
         // id from canvas above thats created in infintEngine.Core
         canvas.id = htmlCanvasID;
@@ -42,10 +42,20 @@ infinitEngine.Core = (function() {
             return;
         }
 
-        // initialize vertex buffer
-        infinitEngine.VertexBuffer.initialize();
     };
-    
+
+    // initialize engine core
+    var initializeEngineCore = function(htmlCanvasID) {
+        
+        _initializeWebGL(htmlCanvasID);
+
+         // initialize vertex buffer
+        infinitEngine.VertexBuffer.initialize();
+
+        // initialize input
+        infinitEngine.Input.initialize();
+    };
+
     // clears draw area
     var clearCanvas = function(color) {
         ivGL.clearColor(color[0], color[1], color[2], color[3]);
@@ -55,7 +65,7 @@ infinitEngine.Core = (function() {
     // contains accessible functions and vars
     var ivPublic = {
         getGL: getGL,
-        initializeWebGL: initializeWebGL,
+        initializeEngineCore: initializeEngineCore,
         clearCanvas: clearCanvas
     };
 
