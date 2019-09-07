@@ -6,7 +6,10 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     this.ivPixelColor = null;
 
     // reference to uModelTransform
-    this.uModelTransform = null;
+    this.ivModelTransform = null;
+
+    // reference to view projection tansform
+    this.ivViewProjTransform = null;
 
     // reference compiled shader webgl context
     this.ivSharedVertexPositionAttribute = null;
@@ -48,16 +51,34 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     this.ivPixelColor = gl.getUniformLocation(this.ivCompiledShader, "uPixelColor");
     this.ivModelTransform = gl.getUniformLocation(this.ivCompiledShader,
         "uModelTransform");
+    this.ivViewProjTransform = gl.getUniformLocation(this.ivCompiledShader, "uViewProjTransform")
+}
+
+// accessor for shader
+SimpleShader.prototype.getShader = function() {
+    return this.ivCompiledShader;
+};
+
+// activate shader
+SimpleShader.prototype.activateShader = function(pixelColor, vpMatrix) {
+    var gl = infinitEngine.Core.getGL();
+    gl.useProgram(this.ivCompiledShader);
+    gl.uniformMatrix4fv(this.ivViewProjTransform, false, vpMatrix);
+    gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
+    gl.uniform4fv(this.ivPixelColor, pixelColor);
+};
+
+// load per object model transform
+SimpleShader.prototype.loadObjectTransform = function(modelTransform) {
+    var gl = infinitEngine.Core.getGL();
+    gl.uniformMatrix4fv(this.ivModelTransform, false, modelTransform);
+    
 }
 
 // return a compiled shader from a shader in the DOM
 SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
     var xmlReq, shaderSource = null, compiledShader = null;
     var gl = infinitEngine.Core.getGL();
-
-    // get shader source from index.html
-    // shaderText = document.getElementById(id);
-    // shaderSource = shaderText.firstChild.textContent;
     
     xmlReq = new XMLHttpRequest();
     xmlReq.open('GET', filePath, false);
@@ -87,24 +108,4 @@ SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
         alert("A shader compiling error occurred: " + gl.getShaderInfoLog(compiledShader));
     }
     return compiledShader;
-}
-
-// activate shader
-SimpleShader.prototype.activateShader = function(pixelColor) {
-    var gl = infinitEngine.Core.getGL();
-    gl.useProgram(this.ivCompiledShader);
-    gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
-    gl.uniform4fv(this.ivPixelColor, pixelColor);
-};
-
-// accessor for shader
-SimpleShader.prototype.getShader = function() {
-    return this.ivCompiledShader;
-};
-
-// load per object model transform
-SimpleShader.prototype.loadObjectTransform = function(modelTransform) {
-    var gl = infinitEngine.Core.getGL();
-    gl.uniformMatrix4fv(this.ivModelTransform, false, modelTransform);
-    
 }
