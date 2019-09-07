@@ -10,10 +10,12 @@ function Renderable(shader) {
 }
 Renderable.prototype.getXform = function() { return this.ivXform; }
 
-Renderable.prototype.draw = function() {
+Renderable.prototype.draw = function(vpMatrix) {
+    // get webgl context 
     var gl = infinitEngine.Core.getGL();
-    this.ivShader.activateShader(this.ivColor);
-    // this.ivShader.loadObjectTransform(modelTranform);
+
+    //activate shader first
+    this.ivShader.activateShader(this.ivColor, vpMatrix);
     this.ivShader.loadObjectTransform(this.ivXform.getXform());
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
