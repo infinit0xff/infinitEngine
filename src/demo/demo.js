@@ -12,9 +12,13 @@ function Demo(htmlCanvasID) {
     // initialize webgl context
     infinitEngine.Core.initializeWebGL(htmlCanvasID);
     
-    // draw with activated geometry and shader
-    var gl = infinitEngine.Core.getGL();
-    
+    // setup the camera
+    this.ivCamera = new Camera(
+    vec2.fromValues(20, 60),    // center
+    20,                         // width
+    [20, 40, 600, 300]          // viewport ( orgX, orgY, width, height)
+    );
+
     // create, load and compile shader 
     this.ivConstColorShader = new SimpleShader(
         "src/glsl_shaders/simple_vs.glsl",
@@ -37,25 +41,6 @@ function Demo(htmlCanvasID) {
 
     // clear the canvas
     infinitEngine.Core.clearCanvas([0.1, 0.8, 0.2, 1]);
-
-    // set up the viewport: area on canvas to be drawn
-    gl.viewport(
-        20,     // x position of bottom-left corner of the area to be drawn
-        40,     // y position of bottom-left corner of the area to be drawn
-        600,    // width of the area to be drawn
-        300);     // height of the area to be drawn
-
-    // set up the corresponding scissor area to limit clear area
-    gl.scissor(
-        20,     // x position of bottom-left corner of the area to be drawn
-        40,     // y position of bottom-left corner of the area to be drawn
-        600,    // width of the area to be drawn
-        300);    // height of the area to be drawn
-
-    // enable the scissor area, clear, and then disable the scissor area
-    gl.enable(gl.SCISSOR_TEST);
-    infinitEngine.Core.clearCanvas([0.8, 0.8, 0.8, 1.0]);  // clear the scissor area
-    gl.disable(gl.SCISSOR_TEST);
 
     // view and projection matrices">
     var viewMatrix = mat4.create();
@@ -81,6 +66,10 @@ function Demo(htmlCanvasID) {
     mat4.multiply(vpMatrix, projMatrix, viewMatrix);
     // </editor-fold>
 
+    // starts the drawing by activating the camera
+    this.ivCamera.setupViewProjection();
+    var vpMatrix = this.ivCamera.getVPMatrix()
+    
     // draw the blue square
     // centre blue, slightly rotated square
     this.ivBlueSq.getXform().setPosition(20, 60);
