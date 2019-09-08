@@ -77,18 +77,10 @@ SimpleShader.prototype.loadObjectTransform = function(modelTransform) {
 
 // return a compiled shader from a shader in the DOM
 SimpleShader.prototype._compileShader = function(filePath, shaderType) {
-    var xmlReq, shaderSource = null, compiledShader = null;
     var gl = infinitEngine.Core.getGL();
+    var shaderSource = null, compiledShader = null;
     
-    xmlReq = new XMLHttpRequest();
-    xmlReq.open('GET', filePath, false);
-    try {
-        xmlReq.send();
-    } catch (error) {
-        alert("Failed to load shader: " + filepath);
-        return null;
-    }
-    
+    // resource map handles file loading
     shaderSource = infinitEngine.ResourceMap.retrieveAsset(filePath);
 
     if (shaderSource === null) {
