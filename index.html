@@ -9,7 +9,9 @@
 <body onload="var demo = new Demo();
     infinitEngine.Core.initializeEngineCore('GLCanvas', demo);
 ">
-    
+     <!-- libs -->
+     <script type="text/javascript" src="src/lib/gl-matrix.js"></script>
+
     <!-- game engine -->
     <script type="text/javascript" src="src/engine/core/engine_core.js"></script>
     <script type="text/javascript" src="src/engine/core/vertex_buffer.js"></script>
@@ -24,11 +26,10 @@
     <script type="text/javascript" src="src/engine/core/resources/engine_defaultresources.js"></script>
 
 
-    <!-- libs -->
-    <script type="text/javascript" src="src/lib/gl-matrix.js"></script>
-
+   
     <!-- client -->
     <script type="text/javascript" src="src/demo/demo.js"></script>
+    <script type="text/javascript" src="src/demo/util/scene_fileparser.js"></script>
 
 </body>
 </html>
