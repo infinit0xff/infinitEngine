@@ -71,14 +71,22 @@ infinitEngine.Core = (function() {
     // clears draw area
     var clearCanvas = function(color) {
         ivGL.clearColor(color[0], color[1], color[2], color[3]);
-        ivGL.clear(setGL().COLOR_BUFFER_BIT);
+        ivGL.clear(ivGL.COLOR_BUFFER_BIT);
+    };
+
+    var inheritPrototype = function(subClass, superClass) {
+        var prototype = Object.create(superClass.prototype);
+        prototype.constructor = subClass;
+        subClass.prototype = prototype;
     };
 
     // contains accessible functions and vars
     var ivPublic = {
         getGL: getGL,
         initializeEngineCore: initializeEngineCore,
-        clearCanvas: clearCanvas
+        clearCanvas: clearCanvas,
+        inheritPrototype: inheritPrototype,
+        startScene: startScene
     };
 
     return ivPublic;

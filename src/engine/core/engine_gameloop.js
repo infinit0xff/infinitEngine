@@ -41,6 +41,9 @@ infinitEngine.GameLoop = (function() {
 
             // draw
             this.draw();
+        } else {
+            // the game loop has stopped, unload current scene
+            ivDemo.unloadScene();
         }
     };
 
@@ -67,8 +70,13 @@ infinitEngine.GameLoop = (function() {
         )
     };
 
+    var stop = function() {
+        ivLoopIsRunning = false;
+    };
+
     var ivPublic = {
-        start: start
+        start: start,
+        stop: stop
     };
     return ivPublic;
 }());
