@@ -1,23 +1,13 @@
 "use strict";
 
-function Demo(htmlCanvasID) {
+function Demo() {
     
-    // shader for drawing
-    this.ivConstColorShader = null;
-
     // square variables
     this.ivBlueSq = null;
     this.ivRedSq = null;
 
     // camera to view the scene
     this.ivCamera = null;
-
-    // initialize webgl context
-    infinitEngine.Core.initializeEngineCore(htmlCanvasID);
-    
-    // initialize the game
-    this.initialize();
-
 }
 
 Demo.prototype.initialize = function() {
@@ -30,18 +20,12 @@ Demo.prototype.initialize = function() {
 
     // set background to dark gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
-
-    // create, load and compile shader 
-    this.ivConstColorShader = new SimpleShader(
-        "src/glsl_shaders/simple_vs.glsl",
-        "src/glsl_shaders/simple_fs.glsl"
-    );
-    
     
     // create renderable objects
-    this.ivRedSq = new Renderable(this.ivConstColorShader);
+    var constColorShader = infinitEngine.DefaultResources.getConstColorShader();
+    this.ivRedSq = new Renderable(constColorShader);
     this.ivRedSq.setColor([0.8, 0.2, 0.2, 1]);
-    this.ivBlueSq = new Renderable(this.ivConstColorShader);
+    this.ivBlueSq = new Renderable(constColorShader);
     this.ivBlueSq.setColor([0.2, 0.4, 0.8, 1]);
     
      // draw the blue square
@@ -57,7 +41,6 @@ Demo.prototype.initialize = function() {
 
     // start the game loop
     infinitEngine.GameLoop.start(this);
-
 };
 
 Demo.prototype.draw = function() {
