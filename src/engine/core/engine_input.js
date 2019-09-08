@@ -63,7 +63,7 @@ infinitEngine.Input = (function() {
     }
 
     var _onKeyUp = function(event) {
-        ivIsKeyPressed[event.keyCode] = true; 
+        ivIsKeyPressed[event.keyCode] = false; 
     }
     
     var initialize = function() {
