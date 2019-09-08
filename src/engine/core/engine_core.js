@@ -44,8 +44,14 @@ infinitEngine.Core = (function() {
 
     };
 
+
+    var startScene = function(demo) {
+        demo.initialize.call(demo);
+        infinitEngine.GameLoop.start(demo);
+    };
+
     // initialize engine core
-    var initializeEngineCore = function(htmlCanvasID) {
+    var initializeEngineCore = function(htmlCanvasID, demo) {
         
         _initializeWebGL(htmlCanvasID);
 
@@ -54,6 +60,12 @@ infinitEngine.Core = (function() {
 
         // initialize input
         infinitEngine.Input.initialize();
+
+        // initialize default resources,
+        // invoke startScene(demo) when done
+        infinitEngine.DefaultResources.initialize(function() {
+            startScene(demo);
+        })
     };
 
     // clears draw area
