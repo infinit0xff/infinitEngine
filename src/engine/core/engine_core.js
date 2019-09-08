@@ -45,9 +45,9 @@ infinitEngine.Core = (function() {
     };
 
 
-    var startScene = function(demo) {
-        demo.initialize.call(demo);
-        infinitEngine.GameLoop.start(demo);
+    var startScene = function(scene) {
+        scene.loadScene.call(scene);
+        infinitEngine.GameLoop.start(scene);
     };
 
     // initialize engine core

@@ -44,19 +44,27 @@ infinitEngine.GameLoop = (function() {
         }
     };
 
-    var start = function(demo) {
-        ivDemo = demo;
-
+    var _startLoop = function () {
         // reset frame time
         ivPreviousTime = Date.now();
         ivLagTime = 0.0;
 
-        // remember loop is running
+        // remember the loop is running
         ivLoopIsRunning = true;
 
         // request _runLoop to start when loading is done
-        requestAnimationFrame(function() {_runLoop.call(ivDemo);} );
+        requestAnimationFrame(function () { _runLoop.call(ivDemo) });
+    };
 
+    var start = function(demo) {
+        ivDemo = demo;
+
+        infinitEngine.ResourceMap.setLoadCompleteCallback(
+            function (){
+                ivDemo.initialize();
+                _startLoop();
+            }
+        )
     };
 
     var ivPublic = {
