@@ -19,8 +19,8 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     // constructor code below
 
     // load and compile vertex and fragment
-    var vertexShader = this._loadAndCompileShader(vertexShaderID, gl.VERTEX_SHADER);
-    var fragmentShader = this._loadAndCompileShader(fragmentShaderID, gl.FRAGMENT_SHADER);
+    var vertexShader = this._compileShader(vertexShaderID, gl.VERTEX_SHADER);
+    var fragmentShader = this._compileShader(fragmentShaderID, gl.FRAGMENT_SHADER);
     
     // create and link shaders
     this.ivCompiledShader = gl.createProgram();
@@ -76,7 +76,7 @@ SimpleShader.prototype.loadObjectTransform = function(modelTransform) {
 }
 
 // return a compiled shader from a shader in the DOM
-SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
+SimpleShader.prototype._compileShader = function(filePath, shaderType) {
     var xmlReq, shaderSource = null, compiledShader = null;
     var gl = infinitEngine.Core.getGL();
     
@@ -89,7 +89,7 @@ SimpleShader.prototype._loadAndCompileShader = function(filePath, shaderType) {
         return null;
     }
     
-    shaderSource = xmlReq.responseText;
+    shaderSource = infinitEngine.ResourceMap.retrieveAsset(filePath);
 
     if (shaderSource === null) {
         alert("WARNING: Loading of: " + filePath + " Failed!");
