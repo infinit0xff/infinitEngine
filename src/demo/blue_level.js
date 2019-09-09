@@ -1,6 +1,11 @@
 "use strict";
 
 function BlueLevel() {
+
+    // audio clips: supports both mp3 and wav formats
+    this.kBgClip = "assets/sounds/bgclip.mp3";
+    this.kCue = "assets/sounds/bluelevel_cue.wav";
+  
     // scene file name
     this.kSceneFile = "assets/bluelevel.xml";
     // all squares
@@ -13,11 +18,20 @@ infinitEngine.Core.inheritPrototype(BlueLevel, Scene);
 BlueLevel.prototype.loadScene = function() {
     infinitEngine.TextFileLoader.loadTextFile(this.kSceneFile,
         infinitEngine.TextFileLoader.eTextFileType.eXMLFile);
-};
+    // loads the audios
+    infinitEngine.AudioClips.loadAudio(this.kBgClip);
+    infinitEngine.AudioClips.loadAudio(this.kCue);
+    };
 
 BlueLevel.prototype.unloadScene = function() {
+    // stop the background audio
+    infinitEngine.AudioClips.stopBackgroundAudio();
+
+    // unload the scene flie and loaded resources
     infinitEngine.TextFileLoader.unloadTextFile(this.kSceneFile);
-    
+    infinitEngine.AudioClips.unloadAudio(this.kBgClip);
+    infinitEngine.AudioClips.unloadAudio(this.kCue);
+
     // load next level
     var nextLevel = new Demo();
     infinitEngine.Core.startScene(nextLevel);
@@ -32,6 +46,8 @@ BlueLevel.prototype.initialize = function() {
     // read all squares
     sceneParser.parseSquares(this.ivSqSet);
 
+    // now start the bg music ...
+    infinitEngine.AudioClips.playBackgroundAudio(this.kBgClip);
 };
 
 BlueLevel.prototype.draw = function() {
@@ -53,6 +69,7 @@ BlueLevel.prototype.update = function() {
     var deltaX = 0.05;
 
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
+        infinitEngine.AudioClips.playACue(this.kCue);
         xform.incXPosBy(deltaX);
         if (xform.getXPos() > 30) { // this is the right-bound of the window
             xform.setPosition(12, 60);
@@ -61,6 +78,7 @@ BlueLevel.prototype.update = function() {
 
     // test for white square movement
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
+        infinitEngine.AudioClips.playACue(this.kCue);
         xform.incXPosBy(-deltaX);
         if (xform.getXPos() < 11) { // this is the left-boundary
             infinitEngine.GameLoop.stop();
