@@ -7,10 +7,8 @@ infinitEngine.ResourceMap = (function() {
     // object to store each resource
     var MapEntry = function(rName) {
         this.ivAsset = rName;
+        this.ivRefCount = 1;
     };
-
-    // resource storage
-    var ivResourceMap = {};
 
     // number of outstanding load operations
     var ivNumOutstandingLoads = 0;
@@ -18,22 +16,8 @@ infinitEngine.ResourceMap = (function() {
     // callback when all textures are loaded
     var ivLoadCompleteCallback = null;
 
-    // support for setting and executing the callback
-    var _checkForAllLoadCompleted = function() {
-        if ((ivNumOutstandingLoads === 0) && (ivLoadCompleteCallback !== null)) {
-            // call complete callback only once
-            var funToCall = ivLoadCompleteCallback;
-            ivLoadCompleteCallback = null;
-            funToCall();
-        }
-    };
-
-    // set callback AFTER all load commands are issued
-    var setLoadCompleteCallback = function (funct) {
-        ivLoadCompleteCallback = funct;
-        // in case all loading is done
-        _checkForAllLoadCompleted();
-    };
+     // resource storage
+     var ivResourceMap = {};
 
     // record asynchronous loading requests and completions
     var asyncLoadRequested = function(rName) {
@@ -50,11 +34,23 @@ infinitEngine.ResourceMap = (function() {
         _checkForAllLoadCompleted();
     };
 
-    // testing load status, retrieving, and unloading resources.
-    var isAssetLoaded = function(rName) {
-        return (rName in ivResourceMap);
+     // support for setting and executing the callback
+     var _checkForAllLoadCompleted = function() {
+        if ((ivNumOutstandingLoads === 0) && (ivLoadCompleteCallback !== null)) {
+            // call complete callback only once
+            var funToCall = ivLoadCompleteCallback;
+            ivLoadCompleteCallback = null;
+            funToCall();
+        }
     };
-    
+
+    // set callback AFTER all load commands are issued
+    var setLoadCompleteCallback = function (funct) {
+        ivLoadCompleteCallback = funct;
+        // in case all loading is done
+        _checkForAllLoadCompleted();
+    };
+
     var retrieveAsset = function(rName) {
         var r = null;
         if(rName in ivResourceMap) {
@@ -65,12 +61,25 @@ infinitEngine.ResourceMap = (function() {
         return r;
     };
 
-    var unloadAsset = function(rName) {
-        if (rName in ivResourceMap) {
-            delete ivResourceMap[rName];
-        }
+    // testing load status, retrieving, and unloading resources.
+    var isAssetLoaded = function(rName) {
+        return (rName in ivResourceMap);
     };
 
+    var incAssetRefCount = function(rName) {
+        ivResourceMap[rName].ivRefCount += 1;
+    };
+    
+    var unloadAsset = function(rName) {
+        var c = 0;
+        if (rName in ivResourceMap) {
+            ivResourceMap[rName].ivRefCount -= 1;
+            c = ivResourceMap[rName].ivRefCount;
+            if (c === 0)
+                delete ivResourceMap[rName];
+        }
+        return c;
+    };
 
     var ivPublic = {
         //async resource loading support
@@ -81,7 +90,8 @@ infinitEngine.ResourceMap = (function() {
         // resource storage
         retrieveAsset: retrieveAsset,
         unloadAsset: unloadAsset,
-        isAssetLoaded: isAssetLoaded
+        isAssetLoaded: isAssetLoaded,
+        incAssetRefCount: incAssetRefCount
     };
 
     return ivPublic;
