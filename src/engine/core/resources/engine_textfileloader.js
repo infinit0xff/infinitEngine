@@ -40,6 +40,8 @@ infinitEngine.TextFileLoader = (function() {
             };
             req.send();
         } else {
+            infinitEngine.ResourceMap.incAssetRefCount(fileName);
+
             if ((callBackFunction !== null) && (callBackFunction !== undefined))
                 callBackFunction(fileName);
         }
