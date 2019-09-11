@@ -8,6 +8,12 @@ function BlueLevel() {
   
     // scene file name
     this.kSceneFile = "assets/bluelevel.xml";
+
+     // textures: ( note: jpg does not support transparency)
+     this.kPortal = "assets/minion_portal.jpg";
+     this.kCollector = "assets/minion_collector.jpg";
+ 
+
     // all squares
     this.ivSqSet = [];  // these are the renderable objects
     // The camera to view the scene
@@ -18,17 +24,26 @@ infinitEngine.Core.inheritPrototype(BlueLevel, Scene);
 BlueLevel.prototype.loadScene = function() {
     infinitEngine.TextFileLoader.loadTextFile(this.kSceneFile,
         infinitEngine.TextFileLoader.eTextFileType.eXMLFile);
+
+    // load the textures
+    infinitEngine.Textures.loadTexture(this.kPortal);
+    infinitEngine.Textures.loadTexture(this.kCollector);
+
     // loads the audios
     infinitEngine.AudioClips.loadAudio(this.kBgClip);
     infinitEngine.AudioClips.loadAudio(this.kCue);
     };
 
 BlueLevel.prototype.unloadScene = function() {
+     // unload the scene flie and loaded resources
+    infinitEngine.TextFileLoader.unloadTextFile(this.kSceneFile);
+    infinitEngine.Textures.unloadTexture(this.kPortal);
+    infinitEngine.Textures.unloadTexture(this.kCollector);
+
     // stop the background audio
     infinitEngine.AudioClips.stopBackgroundAudio();
 
     // unload the scene flie and loaded resources
-    infinitEngine.TextFileLoader.unloadTextFile(this.kSceneFile);
     infinitEngine.AudioClips.unloadAudio(this.kBgClip);
     infinitEngine.AudioClips.unloadAudio(this.kCue);
 
@@ -45,6 +60,8 @@ BlueLevel.prototype.initialize = function() {
 
     // read all squares
     sceneParser.parseSquares(this.ivSqSet);
+    sceneParser.parseTextureSquares(this.ivSqSet);
+
 
     // now start the bg music ...
     infinitEngine.AudioClips.playBackgroundAudio(this.kBgClip);
@@ -65,7 +82,7 @@ BlueLevel.prototype.draw = function() {
 
 BlueLevel.prototype.update = function() {
     //for this very simple game, lets move the square
-    var xform = this.ivSqSet[1].getXform();
+    var xform = this.ivSqSet[0].getXform();
     var deltaX = 0.05;
 
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
@@ -85,4 +102,11 @@ BlueLevel.prototype.update = function() {
         }
     }
 
+     // continously change texture tinting
+     var c = this.ivSqSet[1].getColor();
+     var ca = c[3] + deltaX;
+     if (ca > 1) {
+         ca = 0;
+     }
+     c[3] = ca;
 };
