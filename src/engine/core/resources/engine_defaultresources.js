@@ -20,16 +20,20 @@ infinitEngine.DefaultResources = (function() {
     
     // variable for textureShader object
     var ivTextureShader = null;
+    var ivSpriteShader = null;
 
     // assessor
     var _getConstColorShader = function() { return ivConstColorShader; };
     var getTextureShader = function () { return ivTextureShader; };
+    var getSpriteShader = function () { return ivSpriteShader; };
 
     // callback function after loadings are done
     var _createShaders = function(callBackFunction) {
-       ivConstColorShader = new SimpleShader(kSimpleVS, kSimpleFS);
-       ivTextureShader = new TextureShader(kTextureVS, kTextureFS);
-       callBackFunction();
+        infinitEngine.ResourceMap.setLoadCompleteCallback(null);
+        ivConstColorShader = new SimpleShader(kSimpleVS, kSimpleFS);
+        ivTextureShader = new TextureShader(kTextureVS, kTextureFS);
+        ivSpriteShader =  new SpriteShader(kTextureVS, kTextureFS);
+        callBackFunction();
     };
     // initiate asynchronous loading of glsl shader files
     var _initialize = function(callBackFunction) {
@@ -51,7 +55,8 @@ infinitEngine.DefaultResources = (function() {
     var ivPublic = {
         initialize: _initialize,
         getConstColorShader: _getConstColorShader,
-        getTextureShader: getTextureShader
+        getTextureShader: getTextureShader,
+        getSpriteShader: getSpriteShader
     };
 
     return ivPublic;
