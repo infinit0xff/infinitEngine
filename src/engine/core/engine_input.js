@@ -91,7 +91,7 @@ infinitEngine.Input = (function() {
         return ivIsKeyPressed[keyCode];
     }
 
-    var ivIsKeyClicked = function(keyCode) {
+    var isKeyClicked = function(keyCode) {
         return (ivIsKeyClicked[keyCode]);
     }
 
@@ -100,7 +100,7 @@ infinitEngine.Input = (function() {
         initialize: initialize,
         update: update,
         isKeyPressed: isKeyPressed,
-        ivIsKeyClicked: ivIsKeyClicked,
+        isKeyClicked: isKeyClicked,
         keys: kKeys
     };
 
