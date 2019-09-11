@@ -21,7 +21,7 @@ infinitEngine.Core = (function() {
     
     // setter for webgl context
     var setGL = function() { 
-        let context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        let context = canvas.getContext("webgl", {alpha: false}) || canvas.getContext("experimental-webgl", {alpha: false});
         return context;
     }
 
@@ -37,6 +37,11 @@ infinitEngine.Core = (function() {
         // id from canvas above thats created in infintEngine.Core
         canvas.id = htmlCanvasID;
 
+         // Allows transperency with textures.
+    ivGL.blendFunc(ivGL.SRC_ALPHA, ivGL.ONE_MINUS_SRC_ALPHA);
+    ivGL.enable( ivGL.BLEND ) ;
+    // Set images to flip the y axis to match the texture coordinate space.
+    ivGL.pixelStorei(ivGL.UNPACK_FLIP_Y_WEBGL, true);
         if(ivGL === null) {
             document.write("<br><b>WebGL not supported!</b>");
             return;
