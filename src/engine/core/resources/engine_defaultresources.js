@@ -4,7 +4,7 @@ var infinitEngine = infinitEngine || {};
 
 infinitEngine.DefaultResources = (function() {
     
-    // Simple Shader GLSL Shader file paths
+    // simple shader glsl shader file paths
      
     // path to the VertexShader
     var kSimpleVS = "src/glsl_shaders/simple_vs.glsl";
@@ -14,12 +14,21 @@ infinitEngine.DefaultResources = (function() {
     // variable for SimpleShader object
     var ivConstColorShader = null;
 
+    // texture shader file paths
+    var kTextureVS = "src/glsl_shaders/texture_vs.glsl";  // Path to the VertexShader 
+    var kTextureFS = "src/glsl_shaders/texture_fs.glsl";  // Path to the texture FragmentShader
+    
+    // variable for textureShader object
+    var ivTextureShader = null;
+
     // assessor
     var _getConstColorShader = function() { return ivConstColorShader; };
-    
+    var getTextureShader = function () { return ivTextureShader; };
+
     // callback function after loadings are done
     var _createShaders = function(callBackFunction) {
        ivConstColorShader = new SimpleShader(kSimpleVS, kSimpleFS);
+       ivTextureShader = new TextureShader(kTextureVS, kTextureFS);
        callBackFunction();
     };
     // initiate asynchronous loading of glsl shader files
@@ -30,13 +39,19 @@ infinitEngine.DefaultResources = (function() {
             infinitEngine.TextFileLoader.eTextFileType.eTextFile);
         infinitEngine.TextFileLoader.loadTextFile(kSimpleFS,
             infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+
+         // texture shader: 
+        infinitEngine.TextFileLoader.loadTextFile(kTextureVS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+        infinitEngine.TextFileLoader.loadTextFile(kTextureFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+ 
         infinitEngine.ResourceMap.setLoadCompleteCallback(
             function() {_createShaders(callBackFunction);});
 };
 
     var ivPublic = {
         initialize: _initialize,
-        getConstColorShader: _getConstColorShader
+        getConstColorShader: _getConstColorShader,
+        getTextureShader: getTextureShader
     };
 
     return ivPublic;
