@@ -1,9 +1,6 @@
 "use strict";
 
 function Demo() {
-    // // textures: 
-    // this.kPortal = "assets/minion_portal.png";      // supports png with transparency
-    // this.kCollector = "assets/minion_collector.png";
 
     // textures: 
     this.kFontImage = "assets/Consolas-72.png";
@@ -12,9 +9,6 @@ function Demo() {
     // audio clips: supports both mp3 and wav formats
     this.kBgClip = "assets/sounds/bgclip.mp3";
     this.kCue = "assets/sounds/demo_cue.wav";
-    
-    // scene file name
-    // this.kSceneFile = "assets/scene.xml"
      
     // camera to view the scene
     this.ivCamera = null;
@@ -25,15 +19,13 @@ function Demo() {
     this.ivPortal = null;
     this.ivCollector = null;
     this.ivFontImage = null;
-    this.ivMinion = null;
+    this.mRightMinion = null;
+    this.mLeftMinion = null;
 }
 
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function() {
-    // loads the textures
-    // infinitEngine.Textures.loadTexture(this.kPortal);
-    // infinitEngine.Textures.loadTexture(this.kCollector);
     infinitEngine.Textures.loadTexture(this.kFontImage);
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
 
@@ -43,40 +35,17 @@ Demo.prototype.loadScene = function() {
 
 Demo.prototype.unloadScene = function() {
 
-      // Game loop not running, unload all assets
-
-    //   infinitEngine.Textures.unloadTexture(this.kPortal);
-    //   infinitEngine.Textures.unloadTexture(this.kCollector);
-      infinitEngine.Textures.unloadTexture(this.kFontImage);
-      infinitEngine.Textures.unloadTexture(this.kMinionSprite);
-     // stop the background audio
+    // game loop not running, unload all assets
+    infinitEngine.Textures.unloadTexture(this.kFontImage);
+    infinitEngine.Textures.unloadTexture(this.kMinionSprite);
+    // stop the background audio
     infinitEngine.AudioClips.stopBackgroundAudio();
 
      // unload the scene resources
-     infinitEngine.AudioClips.unloadAudio(this.kCue);
+    infinitEngine.AudioClips.unloadAudio(this.kCue);
      //      You know this clip will be used elsewhere in the game
      //      So you decide to not unload this clip!!
- 
-    var nextLevel = new BlueLevel();
-    infinitEngine.Core.startScene(nextLevel);
 };
-
-// Demo.prototype.draw = function () {
-
-//     // game loop not running, unload all assets
-//     // then stop the background audio
-//     infinitEngine.AudioClips.stopBackgroundAudio();
-
-//     // unload the scene resources
-//     infinitEngine.AudioClips.unloadAudio(this.kCue);
-//     //      The above line is commented out on purpose because
-//     //      you know this clip will be used elsewhere in the game
-//     //      So you decide to not unload this clip!!
-
-//     // starts the next level
-//     var nextLevel = new BlueLevel();  // next level to be loaded
-//     infinitEngine.Core.startScene(nextLevel);
-// };
 
 Demo.prototype.initialize = function() {
     // set up the cameras
@@ -107,10 +76,31 @@ Demo.prototype.initialize = function() {
     this.ivFontImage.getXform().setPosition(13, 62);
     this.ivFontImage.getXform().setSize(4, 4);
 
-    this.ivMinion = new SpriteRenderable(this.kMinionSprite);
-    this.ivMinion.setColor([1, 1, 1, 0]);
-    this.ivMinion.getXform().setPosition(26, 56);
-    this.ivMinion.getXform().setSize(5, 2.5);
+    // the right minion
+    this.ivRightMinion= new SpriteAnimateRenderable(this.kMinionSprite);
+    this.ivRightMinion.setColor([1, 1, 1, 0]);
+    this.ivRightMinion.getXform().setPosition(26, 56.5);
+    this.ivRightMinion.getXform().setSize(4, 3.2);
+    this.ivRightMinion.setSpriteSequence(512, 0,     // first element pixel position: top-left 512 is top of image, 0 is left of image
+                                    204, 164,       // widthxheight in pixels
+                                    5,              // number of elements in this sequence
+                                    0);             // horizontal padding in between
+    this.ivRightMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateRight);
+    this.ivRightMinion.setAnimationSpeed(50);
+                                // show each element for mAnimSpeed updates
+
+    // the left minion
+    this.ivLeftMinion = new SpriteAnimateRenderable(this.kMinionSprite);
+    this.ivLeftMinion.setColor([1, 1, 1, 0]);
+    this.ivLeftMinion.getXform().setPosition(15, 56.5);
+    this.ivLeftMinion.getXform().setSize(4, 3.2);
+    this.ivLeftMinion.setSpriteSequence(348, 0,      // first element pixel position: top-right 164 from 512 is top of image, 0 is right of image
+                                    204, 164,       // widthxheight in pixels
+                                    5,              // number of elements in this sequence
+                                    0);             // horizontal padding in between
+    this.ivLeftMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateRight);
+    this.ivLeftMinion.setAnimationSpeed(50);
+                                // show each element for mAnimSpeed updates
 
     // Step D: Create the hero object with texture from the lower-left corner 
     this.ivHero = new SpriteRenderable(this.kMinionSprite);
@@ -136,8 +126,8 @@ Demo.prototype.draw = function() {
     this.ivHero.draw(this.ivCamera.getVPMatrix());
     this.ivCollector.draw(this.ivCamera.getVPMatrix());
     this.ivFontImage.draw(this.ivCamera.getVPMatrix());
-    this.ivMinion.draw(this.ivCamera.getVPMatrix());
-
+    this.ivRightMinion.draw(this.ivCamera.getVPMatrix());
+    this.ivLeftMinion.draw(this.ivCamera.getVPMatrix());
 };
 
 Demo.prototype.update = function() {
@@ -147,22 +137,23 @@ Demo.prototype.update = function() {
     var deltaX = 0.05;
     var xform = this.ivHero.getXform();
 
-   // support hero movements
-   if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
-    infinitEngine.AudioClips.playACue(this.kCue);
-    xform.incXPosBy(deltaX);
-    if (xform.getXPos() > 30) { // this is the right-bound of the window
-        xform.setPosition(12, 60);
+    // support hero movements
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
+        infinitEngine.AudioClips.playACue(this.kCue);
+        xform.incXPosBy(deltaX);
+        if (xform.getXPos() > 30) { // this is the right-bound of the window
+            xform.setPosition(12, 60);
+        }
     }
-}
 
-if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
-    infinitEngine.AudioClips.playACue(this.kCue);
-    xform.incXPosBy(-deltaX);
-    if (xform.getXPos() < 11) {  // this is the left-bound of the window
-        infinitEngine.GameLoop.stop();
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
+        infinitEngine.AudioClips.playACue(this.kCue);
+        xform.incXPosBy(-deltaX);
+        if (xform.getXPos() < 11) {  // this is the left-bound of the window
+        // infinitEngine.GameLoop.stop();
+            xform.setXPos(20);
+        }
     }
-}
 
     // continously change texture tinting
     var c = this.ivPortal.getColor();
@@ -199,27 +190,38 @@ if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
         texCoord[SpriteRenderable.eTexCoordArray.eTop]
     );
    
-    // for minion: zoom to the bottom right corner by changing top left
-    texCoord = this.ivMinion.getElementUVCoordinateArray();
-            // The 8 elements:
-            //      mTexRight,  mTexTop,          // x,y of top-right
-            //      mTexLeft,   mTexTop,
-            //      mTexRight,  mTexBottom,
-            //      mTexLeft,   mTexBottom
-    var t = texCoord[SpriteRenderable.eTexCoordArray.eTop] - deltaT;
-    var l = texCoord[SpriteRenderable.eTexCoordArray.eLeft] + deltaT;
+    // control sprite animation
+    // remember to update the minion's animation
+    this.ivRightMinion.updateAnimation();
+    this.ivLeftMinion.updateAnimation();
 
-    if (l > 0.5) {
-        l = 0;
-    }
-    if (t < 0.5) {
-        t = 1.0;
+    // animate left on the sprite sheet
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.One)) {
+        this.ivRightMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateLeft);
+        this.ivLeftMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateLeft);
     }
 
-    this.ivMinion.setElementUVCoordinate(
-        l,
-        texCoord[SpriteRenderable.eTexCoordArray.eRight],
-        texCoord[SpriteRenderable.eTexCoordArray.eBottom],
-        t
-    );
+    // swing animation 
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Two)) {
+        this.ivRightMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateSwing);
+        this.ivLeftMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateSwing);
+    }
+
+    // animate right on the sprite sheet
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Three)) {
+        this.ivRightMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateRight);
+        this.ivLeftMinion.setAnimationType(SpriteAnimateRenderable.eAnimationType.eAnimateRight);
+    }
+
+    // decrease the duration of showing each sprite element, thereby speeding up the animation
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Four)) {
+        this.ivRightMinion.incAnimationSpeed(-2);
+        this.ivLeftMinion.incAnimationSpeed(-2);
+    }
+
+    // increase the duration of showing each sprite element, thereby slowing down the animation
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Five)) {
+        this.ivRightMinion.incAnimationSpeed(2);
+        this.ivLeftMinion.incAnimationSpeed(2);
+    }
 };
