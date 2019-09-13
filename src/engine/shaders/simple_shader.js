@@ -1,4 +1,6 @@
-function SimpleShader(vertexShaderID, fragmentShaderID) {
+"use strict";
+
+function SimpleShader(vertexShaderPath, fragmentShaderPath) {
     // instance vars
     this.ivCompiledShader = null;
 
@@ -19,13 +21,13 @@ function SimpleShader(vertexShaderID, fragmentShaderID) {
     // constructor code below
 
     // load and compile vertex and fragment
-    var vertexShader = this._compileShader(vertexShaderID, gl.VERTEX_SHADER);
-    var fragmentShader = this._compileShader(fragmentShaderID, gl.FRAGMENT_SHADER);
+    this.ivVertexShader = this._compileShader(vertexShaderPath, gl.VERTEX_SHADER);
+    this.ivFragmentShader = this._compileShader(fragmentShaderPath, gl.FRAGMENT_SHADER);
     
     // create and link shaders
     this.ivCompiledShader = gl.createProgram();
-    gl.attachShader(this.ivCompiledShader, vertexShader);
-    gl.attachShader(this.ivCompiledShader, fragmentShader);
+    gl.attachShader(this.ivCompiledShader, this.ivVertexShader);
+    gl.attachShader(this.ivCompiledShader, this.ivFragmentShader);
     gl.linkProgram(this.ivCompiledShader);
 
     // check for errors
