@@ -48,3 +48,10 @@ SpriteShader.prototype.activateShader = function(pixelColor, vpMatrix) {
     gl.enableVertexAttribArray(this.ivShaderTextureCoordAttribute);
 };
 
+// cleanup to release allocated memory
+SpriteShader.prototype.cleanUp = function () {
+    var gl = infinitEngine.Core.getGL();
+    gl.deleteBuffer(this.ivTexCoordBuffer);
+    // now call super class's clean up ...
+    SimpleShader.prototype.cleanUp.call(this);
+};

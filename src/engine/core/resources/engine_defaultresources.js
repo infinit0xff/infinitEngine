@@ -58,14 +58,33 @@ infinitEngine.DefaultResources = (function() {
 
         infinitEngine.ResourceMap.setLoadCompleteCallback(
             function() {_createShaders(callBackFunction);});
-};
+    };
+
+     // unload all resources
+     var cleanUp = function () {
+        ivConstColorShader.cleanUp();
+        ivTextureShader.cleanUp();
+        ivSpriteShader.cleanUp();
+
+        infinitEngine.TextFileLoader.unloadTextFile(kSimpleVS);
+        infinitEngine.TextFileLoader.unloadTextFile(kSimpleFS);
+
+        // texture shader: 
+        infinitEngine.TextFileLoader.unloadTextFile(kTextureVS);
+        infinitEngine.TextFileLoader.unloadTextFile(kTextureFS);
+
+        // default font
+        infinitEngine.Fonts.unloadFont(kDefaultFont);
+    };
+
 
     var ivPublic = {
         initialize: initialize,
         getConstColorShader: getConstColorShader,
         getTextureShader: getTextureShader,
         getSpriteShader: getSpriteShader,
-        getDefaultFont: getDefaultFont
+        getDefaultFont: getDefaultFont,
+        cleanUp: cleanUp
     };
 
     return ivPublic;

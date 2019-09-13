@@ -103,3 +103,11 @@ SimpleShader.prototype._compileShader = function(filePath, shaderType) {
     }
     return compiledShader;
 }
+
+SimpleShader.prototype.cleanUp = function () {
+    var gl = infinitEngine.Core.getGL();
+    gl.detachShader(this.ivCompiledShader, this.ivVertexShader);
+    gl.detachShader(this.ivCompiledShader, this.ivFragmentShader);
+    gl.deleteShader(this.ivVertexShader);
+    gl.deleteShader(this.ivFragmentShader);
+};

@@ -87,13 +87,20 @@ infinitEngine.Core = (function() {
         subClass.prototype = prototype;
     };
 
+    // unloads all allocated resources
+    var cleanUp = function() {
+        infinitEngine.VertexBuffer.cleanUp();
+        infinitEngine.DefaultResources.cleanUp();
+    };
+
     // contains accessible functions and vars
     var ivPublic = {
         getGL: getGL,
         initializeEngineCore: initializeEngineCore,
         clearCanvas: clearCanvas,
         inheritPrototype: inheritPrototype,
-        startScene: startScene
+        startScene: startScene,
+        cleanUp: cleanUp
     };
 
     return ivPublic;

@@ -50,6 +50,12 @@ infinitEngine.VertexBuffer = (function() {
     
     };
 
+    var cleanUp = function() {
+        var gl = infinitEngine.Core.getGL();
+        gl.deleteBuffer(ivSquareVertexBuffer);
+        gl.deleteBuffer(ivTextureCoordBuffer);
+    };
+
     // getters
     var getGLVertexRef = function() { return ivSquareVertexBuffer; };
     var getGLTexCoordRef = function () { return ivTextureCoordBuffer; };
@@ -57,7 +63,8 @@ infinitEngine.VertexBuffer = (function() {
     var ivPublic = {
         initialize: initialize,
         getGLVertexRef: getGLVertexRef,
-        getGLTexCoordRef: getGLTexCoordRef
+        getGLTexCoordRef: getGLTexCoordRef,
+        cleanUp: cleanUp
     };
     
     return ivPublic;
