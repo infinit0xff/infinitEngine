@@ -2,17 +2,24 @@
 
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
-    // The camera to view the scene
+   
+    // the camera to view the scene
     this.ivCamera = null;
 
-    // For echo message
+    // for echo message
     this.ivMsg = null;
 
     // the hero and the support objects
     this.ivHero = null;
-    this.ivMinionset = null;
-    this.ivDyePack = null;
+    this.ivBrain = null;
+
+    // mode of running: 
+    //   H: Player drive brain
+    //   J: Dye drive brain, immediate orientation change
+    //   K: Dye drive brain, gradual orientation change
+    this.ivMode = 'H';
 }
+
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
@@ -24,7 +31,7 @@ Demo.prototype.unloadScene = function () {
 };
 
 Demo.prototype.initialize = function () {
-    // Step A: set up the cameras
+    // set up the cameras
     this.ivCamera = new Camera(
         vec2.fromValues(50, 37.5),   // position of the camera
         100,                       // width of camera
@@ -32,50 +39,64 @@ Demo.prototype.initialize = function () {
     );
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
             // sets the background to gray
-            // 
-    // Step B: The dye pack: simply another GameObject
-    this.ivDyePack = new DyePack(this.kMinionSprite);
 
-    // Step C: A set of Minions
-    this.ivMinionset = new GameObjectSet();
-    var i = 0, randomY, aMinion;
-    // create 5 minions at random Y values
-    for (i = 0; i <  5; i++) {
-        randomY = Math.random() * 65;
-        aMinion = new Minion(this.kMinionSprite, randomY);
-        this.ivMinionset.addToSet(aMinion);
-    }
+    // create the brain  
+    this.ivBrain = new Brain(this.kMinionSprite);
 
-    // Step D: Create the hero object
+    //  create the hero object 
     this.ivHero = new Hero(this.kMinionSprite);
 
-    // Step E: Create and initialize message output
+    // for displaying message 
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([0, 0, 0, 1]);
     this.ivMsg.getXform().setPosition(1, 2);
     this.ivMsg.setTextHeight(3);
 };
 
-// This is the draw function, make sure to setup proper drawing environment, and more
+// this is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
-    // Step A: clear the canvas
+    // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // Step  B: Activate the drawing Camera
+    // activate the drawing Camera
     this.ivCamera.setupViewProjection();
 
-    // Step  C: draw everything
+    // draw everything
     this.ivHero.draw(this.ivCamera);
-    this.ivMinionset.draw(this.ivCamera);
-    this.ivDyePack.draw(this.ivCamera);
+    this.ivBrain.draw(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);
 };
 
-// The Update function, updates the application state. Make sure to _NOT_ draw
+// the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
+    var msg = "Brain modes [H:keys, J:immediate, K:gradual]: ";
+    var rate = 1;
+
     this.ivHero.update();
-    this.ivMinionset.update();
-    this.ivDyePack.update();
+
+    switch (this.ivMode) {
+    case 'H':
+        this.ivBrain.update();  // player steers with arrow keys
+        break;
+    case 'K':
+        rate = 0.02;    // graduate rate
+        // when "K" is typed, the following should also be executed.
+    case 'J':
+        this.ivBrain.rotateObjPointTo(this.ivHero.getXform().getPosition(), rate);
+        GameObject.prototype.update.call(this.ivBrain);  // the default GameObject: only move forward
+        break;
+    }
+
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
+        this.ivMode = 'H';
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.J)) {
+        this.ivMode = 'J';
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.K)) {
+        this.ivMode = 'K';
+    }
+    this.ivMsg.setText(msg + this.ivMode);
 };
