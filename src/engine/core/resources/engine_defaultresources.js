@@ -22,8 +22,12 @@ infinitEngine.DefaultResources = (function() {
     var ivTextureShader = null;
     var ivSpriteShader = null;
 
-    // assessor
-    var _getConstColorShader = function() { return ivConstColorShader; };
+    // default font
+    var kDefaultFont = "assets/fonts/system-default-font";
+    var getDefaultFont = function() { return kDefaultFont; };
+
+    // getters
+    var getConstColorShader = function() { return ivConstColorShader; };
     var getTextureShader = function () { return ivTextureShader; };
     var getSpriteShader = function () { return ivSpriteShader; };
 
@@ -35,8 +39,9 @@ infinitEngine.DefaultResources = (function() {
         ivSpriteShader =  new SpriteShader(kTextureVS, kTextureFS);
         callBackFunction();
     };
+
     // initiate asynchronous loading of glsl shader files
-    var _initialize = function(callBackFunction) {
+    var initialize = function(callBackFunction) {
         
         // constant color shader: SimpleVS, and SimpleFS
         infinitEngine.TextFileLoader.loadTextFile(kSimpleVS,
@@ -48,15 +53,19 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.loadTextFile(kTextureVS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
         infinitEngine.TextFileLoader.loadTextFile(kTextureFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
  
+        // load default font
+        infinitEngine.Fonts.loadFont(kDefaultFont);
+
         infinitEngine.ResourceMap.setLoadCompleteCallback(
             function() {_createShaders(callBackFunction);});
 };
 
     var ivPublic = {
-        initialize: _initialize,
-        getConstColorShader: _getConstColorShader,
+        initialize: initialize,
+        getConstColorShader: getConstColorShader,
         getTextureShader: getTextureShader,
-        getSpriteShader: getSpriteShader
+        getSpriteShader: getSpriteShader,
+        getDefaultFont: getDefaultFont
     };
 
     return ivPublic;
