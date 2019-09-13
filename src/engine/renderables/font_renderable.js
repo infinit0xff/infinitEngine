@@ -8,7 +8,7 @@ function FontRenderable(aString) {
     this.ivText = aString;
 }
 
-FontRenderable.prototype.draw = function (vpMatrix) {
+FontRenderable.prototype.draw = function (aCamera) {
 
     // we will draw the text string by calling to ivOneChar for each of the
     // chars in the ivText string.
@@ -41,7 +41,7 @@ FontRenderable.prototype.draw = function (vpMatrix) {
 
         this.ivOneChar.getXform().setPosition(xPos - xOffset, yPos - yOffset);
 
-        this.ivOneChar.draw(vpMatrix);
+        this.ivOneChar.draw(aCamera);
 
         xPos += widthOfOneChar;
     }

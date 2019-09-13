@@ -62,10 +62,10 @@ SimpleShader.prototype.getShader = function() {
 };
 
 // activate shader
-SimpleShader.prototype.activateShader = function(pixelColor, vpMatrix) {
+SimpleShader.prototype.activateShader = function(pixelColor, aCamera) {
     var gl = infinitEngine.Core.getGL();
     gl.useProgram(this.ivCompiledShader);
-    gl.uniformMatrix4fv(this.ivViewProjTransform, false, vpMatrix);
+    gl.uniformMatrix4fv(this.ivViewProjTransform, false, aCamera.getVPMatrix());
     gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
     gl.uniform4fv(this.ivPixelColor, pixelColor);
 };

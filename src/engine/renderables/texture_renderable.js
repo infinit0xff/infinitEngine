@@ -8,10 +8,10 @@ function TextureRenderable(myTexture) {
 }
 infinitEngine.Core.inheritPrototype(TextureRenderable, Renderable);
 
-TextureRenderable.prototype.draw = function (vpMatrix) {
+TextureRenderable.prototype.draw = function (aCamera) {
     // activate the texture
     infinitEngine.Textures.activateTexture(this.ivTexture);
-    Renderable.prototype.draw.call(this, vpMatrix);
+    Renderable.prototype.draw.call(this, aCamera);
 };
 
 TextureRenderable.prototype.getTexture = function () { return this.ivTexture; };

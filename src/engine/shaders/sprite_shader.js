@@ -32,9 +32,9 @@ SpriteShader.prototype.setTextureCoordinate = function(texCoord) {
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(texCoord))
 };
 
-SpriteShader.prototype.activateShader = function(pixelColor, vpMatrix) {
+SpriteShader.prototype.activateShader = function(pixelColor, aCamera) {
     // call superclass
-    SimpleShader.prototype.activateShader.call(this, pixelColor, vpMatrix);
+    SimpleShader.prototype.activateShader.call(this, pixelColor, aCamera);
     
     // bind texture coordinate buffer
     var gl = infinitEngine.Core.getGL();

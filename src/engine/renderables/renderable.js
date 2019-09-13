@@ -9,12 +9,12 @@ function Renderable() {
     this.ivColor = [1, 1, 1, 1];
 }
 
-Renderable.prototype.draw = function(vpMatrix) {
+Renderable.prototype.draw = function(aCamera) {
     // get webgl context 
     var gl = infinitEngine.Core.getGL();
 
     //activate shader first
-    this.ivShader.activateShader(this.ivColor, vpMatrix);
+    this.ivShader.activateShader(this.ivColor, aCamera);
     this.ivShader.loadObjectTransform(this.ivXform.getXform());
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
