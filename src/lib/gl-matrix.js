@@ -428,6 +428,27 @@ vec2.negate = function(out, a) {
 };
 
 /**
+ * Rotate a 2D vector (around the z-axis)
+ * @param {vec2} out The receiving vec3
+ * @param {vec2} a The vec2 point to rotate
+ * @param {vec2} b The origin of the rotation
+ * @param {Number} c The angle of rotation
+ * @returns {vec2} out
+ */
+vec2.rotate = function(out, a, c){
+    var r=[];
+
+    //perform rotation
+    r[0] = a[0]*Math.cos(c) - a[1]*Math.sin(c);
+    r[1] = a[0]*Math.sin(c) + a[1]*Math.cos(c);
+      
+      out[0] = r[0];
+      out[1] = r[1];
+
+    return r;
+};
+
+/**
  * Normalize a vec2
  *
  * @param {vec2} out the receiving vector
