@@ -8,6 +8,11 @@ function GameObject(renderableObj) {
 }
 
 GameObject.prototype.getXform = function () { return this.ivRenderComponent.getXform(); };
+GameObject.prototype.getBBox = function () {
+    var xform = this.getXform();
+    var b = new BoundingBox(xform.getPosition(), xform.getWidth(), xform.getHeight());
+    return b;
+};
 
 GameObject.prototype.setVisibility = function (f) { this.ivVisible = f; };
 GameObject.prototype.isVisible = function () { return this.ivVisible; };
