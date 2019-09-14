@@ -2,51 +2,47 @@
 
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
-   
+    this.kMinionCollector = "assets/minion_collector.png";
+    this.kMinionPortal = "assets/minion_portal.png";
+    
     // the camera to view the scene
     this.ivCamera = null;
 
-    // for echo message
     this.ivMsg = null;
 
-    // the hero and the support objects
-    this.ivHero = null;
-    this.ivBrain = null;
-
-    // mode of running: 
-    //   H: Player drive brain
-    //   J: Dye drive brain, immediate orientation change
-    //   K: Dye drive brain, gradual orientation change
-    this.ivMode = 'H';
+    this.ivCollector = null;
+    this.ivPortal = null;
 }
-
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
+    infinitEngine.Textures.loadTexture(this.kMinionCollector);
+    infinitEngine.Textures.loadTexture(this.kMinionPortal);
 };
 
 Demo.prototype.unloadScene = function () {
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
+    infinitEngine.Textures.unloadTexture(this.kMinionCollector);
+    infinitEngine.Textures.unloadTexture(this.kMinionPortal);
 };
 
 Demo.prototype.initialize = function () {
     // set up the cameras
     this.ivCamera = new Camera(
-        vec2.fromValues(50, 37.5),   // position of the camera
+        vec2.fromValues(50, 37.5), // position of the camera
         100,                       // width of camera
         [0, 0, 640, 480]           // viewport (orgX, orgY, width, height)
     );
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
             // sets the background to gray
 
-    // create the brain  
-    this.ivBrain = new Brain(this.kMinionSprite);
+    this.ivDyePack = new DyePack(this.kMinionSprite);
+    this.ivDyePack.setVisibility(false);
 
-    //  create the hero object 
-    this.ivHero = new Hero(this.kMinionSprite);
+    this.ivCollector = new TextureObject(this.kMinionCollector, 50, 30, 30, 30);
+    this.ivPortal = new TextureObject(this.kMinionPortal, 70, 30, 10, 10);
 
-    // for displaying message 
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([0, 0, 0, 1]);
     this.ivMsg.getXform().setPosition(1, 2);
@@ -63,48 +59,33 @@ Demo.prototype.draw = function () {
     this.ivCamera.setupViewProjection();
 
     // draw everything
-    this.ivHero.draw(this.ivCamera);
-    this.ivBrain.draw(this.ivCamera);
+    this.ivCollector.draw(this.ivCamera);
+    this.ivPortal.draw(this.ivCamera);
+    this.ivDyePack.draw(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);
 };
 
 // the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "Brain [H:keys J:imm K:gradual]: ";
-    var rate = 1;
+    var msg = "No Collision";
 
-    this.ivHero.update();
-    
-    // get the bounding box for collision
-    var hBbox = this.ivHero.getBBox();
-    var bBbox = this.ivBrain.getBBox();
-    switch (this.ivMode) {
-    case 'H':
-        this.ivBrain.update();  // player steers with arrow keys
-        break;
-    case 'K':
-        rate = 0.02;    // graduate rate
-        // when "K" is typed, the following should also be executed.
-    case 'J':
-        if (!hBbox.intersectsBound(bBbox)) {  // stop the brain when it touches hero bound
-            this.ivBrain.rotateObjPointTo(this.ivHero.getXform().getPosition(), rate);
-            GameObject.prototype.update.call(this.ivBrain);  // the default GameObject: only move forward
-        }
-        break;
+    this.ivCollector.update(infinitEngine.Input.keys.W, infinitEngine.Input.keys.S,
+        infinitEngine.Input.keys.A, infinitEngine.Input.keys.D);
+    this.ivPortal.update(infinitEngine.Input.keys.Up, infinitEngine.Input.keys.Down,
+        infinitEngine.Input.keys.Left, infinitEngine.Input.keys.Right);
+
+    var h = [];
+
+    // portal's resolution is 1/16 x 1/16 that of Collector!
+    // if (this.ivCollector.pixelTouches(this.ivPortal, h)) {  // <-- VERY EXPENSIVE!!
+    if (this.ivPortal.pixelTouches(this.ivCollector, h)) {
+        msg = "Collided!: (" + h[0].toPrecision(4) + " " + h[1].toPrecision(4) + ")";
+        this.ivDyePack.setVisibility(true);
+        this.ivDyePack.getXform().setXPos(h[0]);
+        this.ivDyePack.getXform().setYPos(h[1]);
+    } else {
+        this.ivDyePack.setVisibility(false);
     }
-    
-    // Check for hero going outside 80% of the WC Window bound
-    var status = this.ivCamera.collideWCBound(this.ivHero.getXform(), 0.8);
-    
-    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
-        this.ivMode = 'H';
-    }
-    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.J)) {
-        this.ivMode = 'J';
-    }
-    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.K)) {
-        this.ivMode = 'K';
-    }
-    this.ivMsg.setText(msg + this.ivMode + " [Hero bound=" + status + "]");
-    };
+    this.ivMsg.setText(msg);
+};
