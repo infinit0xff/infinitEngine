@@ -1,4 +1,4 @@
-"use strict";  // Operate in Strict mode such that variables must be declared before used!
+"use strict";
 
 var infinitEngine = infinitEngine || { };
 
@@ -7,6 +7,8 @@ function TextureInfo(name, w, h, id) {
     this.ivWidth = w;
     this.ivHeight = h;
     this.ivGLTexID = id;
+    this.ivColorArray = null;
+
 }
 
 infinitEngine.Textures = (function () {
@@ -102,14 +104,38 @@ infinitEngine.Textures = (function () {
         return infinitEngine.ResourceMap.retrieveAsset(textureName);
     };
 
-    // Public interface for this object. Anything not in here will
+    // retrieve the color array from the WebGL context 
+    var getColorArray = function (textureName) {
+        var texInfo = getTextureInfo(textureName);
+        if (texInfo.ivColorArray === null) {
+            // create a framebuffer bind it to the texture, and read the color content
+            // Hint from: http://stackoverflow.com/questions/13626606/read-pixels-from-a-webgl-texture 
+            var gl = infinitEngine.Core.getGL();
+            var fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texInfo.ivGLTexID, 0);
+            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+                var pixels = new Uint8Array(texInfo.ivWidth * texInfo.ivHeight * 4);
+                gl.readPixels(0, 0, texInfo.ivWidth, texInfo.ivHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                texInfo.ivColorArray = pixels;
+            } else {
+                alert("WARNING: Engine.Textures.getColorArray() failed!");
+            }
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.deleteFramebuffer(fb);
+        }
+        return texInfo.ivColorArray;
+    };
+
+    // public interface for this object. Anything not in here will
     // not be accessable.
     var ivPublic = {
         loadTexture: loadTexture,
         unloadTexture: unloadTexture,
         activateTexture: activateTexture,
         deactivateTexture: deactivateTexture,
-        getTextureInfo: getTextureInfo
+        getTextureInfo: getTextureInfo,
+        getColorArray: getColorArray
     };
     return ivPublic;
 }());
