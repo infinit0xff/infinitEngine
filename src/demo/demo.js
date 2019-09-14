@@ -71,11 +71,14 @@ Demo.prototype.draw = function () {
 // the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "Brain modes [H:keys, J:immediate, K:gradual]: ";
+    var msg = "Brain [H:keys J:imm K:gradual]: ";
     var rate = 1;
 
     this.ivHero.update();
-
+    
+    // get the bounding box for collision
+    var hBbox = this.ivHero.getBBox();
+    var bBbox = this.ivBrain.getBBox();
     switch (this.ivMode) {
     case 'H':
         this.ivBrain.update();  // player steers with arrow keys
@@ -84,11 +87,16 @@ Demo.prototype.update = function () {
         rate = 0.02;    // graduate rate
         // when "K" is typed, the following should also be executed.
     case 'J':
-        this.ivBrain.rotateObjPointTo(this.ivHero.getXform().getPosition(), rate);
-        GameObject.prototype.update.call(this.ivBrain);  // the default GameObject: only move forward
+        if (!hBbox.intersectsBound(bBbox)) {  // stop the brain when it touches hero bound
+            this.ivBrain.rotateObjPointTo(this.ivHero.getXform().getPosition(), rate);
+            GameObject.prototype.update.call(this.ivBrain);  // the default GameObject: only move forward
+        }
         break;
     }
-
+    
+    // Check for hero going outside 80% of the WC Window bound
+    var status = this.ivCamera.collideWCBound(this.ivHero.getXform(), 0.8);
+    
     if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
         this.ivMode = 'H';
     }
@@ -98,5 +106,5 @@ Demo.prototype.update = function () {
     if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.K)) {
         this.ivMode = 'K';
     }
-    this.ivMsg.setText(msg + this.ivMode);
-};
+    this.ivMsg.setText(msg + this.ivMode + " [Hero bound=" + status + "]");
+    };
