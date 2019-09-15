@@ -31,7 +31,7 @@ Camera.prototype.getWCWidth = function () { return this.ivWCWidth; };
 Camera.prototype.getWCHeight = function () { return this.ivWCWidth * this.ivViewport[3] / this.ivViewport[2]; };
 
 Camera.prototype.setViewport = function(viewportArray) {
-    this.mViewport = viewportArray; };
+    this.ivViewport = viewportArray; };
 Camera.prototype.getViewport = function() { return this.ivViewport; };
 
 Camera.prototype.setBackgroundColor = function(newColor) {
