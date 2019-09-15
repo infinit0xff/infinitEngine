@@ -71,9 +71,9 @@ Demo.prototype.update = function () {
     var msg = "No Collision";
 
     this.ivCollector.update(infinitEngine.Input.keys.W, infinitEngine.Input.keys.S,
-        infinitEngine.Input.keys.A, infinitEngine.Input.keys.D);
+        infinitEngine.Input.keys.A, infinitEngine.Input.keys.D, infinitEngine.Input.keys.E);
     this.ivPortal.update(infinitEngine.Input.keys.Up, infinitEngine.Input.keys.Down,
-        infinitEngine.Input.keys.Left, infinitEngine.Input.keys.Right);
+        infinitEngine.Input.keys.Left, infinitEngine.Input.keys.Right, infinitEngine.Input.keys.P);
 
     var h = [];
 
