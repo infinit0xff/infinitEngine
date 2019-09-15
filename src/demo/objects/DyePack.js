@@ -3,6 +3,7 @@
 function DyePack(spriteTexture) {
     this.kRefWidth = 80;
     this.kRefHeight = 130;
+    this.kDelta = 0.5;
 
     this.ivDyePack = new SpriteRenderable(spriteTexture);
     this.ivDyePack.setColor([1, 1, 1, 0.1]);
@@ -12,3 +13,23 @@ function DyePack(spriteTexture) {
     GameObject.call(this, this.ivDyePack);
 }
 infinitEngine.Core.inheritPrototype(DyePack, GameObject);
+
+DyePack.prototype.update = function () {
+    var xform = this.getXform();
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Up)) {
+        xform.incYPosBy(this.kDelta);
+    }
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Down)) {
+        xform.incYPosBy(-this.kDelta);
+    }
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
+        xform.incXPosBy(-this.kDelta);
+    }
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
+        xform.incXPosBy(this.kDelta);
+    }
+
+    if (this.isVisible()) {
+        xform.incYPosBy(-this.kDelta);
+    }
+};
