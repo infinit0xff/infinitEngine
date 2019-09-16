@@ -6,7 +6,9 @@ function SpriteRenderable(myTexture) {
     this.ivTexLeft = 0.0;   // bounds of texture coordinate (0 is left, 1 is right)
     this.ivTexRight = 1.0;  // 
     this.ivTexTop = 1.0;    //   1 is top and 0 is bottom of image
-    this.ivTexBottom = 0.0; // 
+    this.ivTexBottom = 0.0;
+    this._setTexInfo();
+
 }
 infinitEngine.Core.inheritPrototype(SpriteRenderable, TextureRenderable);
 
@@ -29,6 +31,7 @@ SpriteRenderable.prototype.setElementUVCoordinate = function (left, right, botto
     this.ivTexRight = right;
     this.ivTexBottom = bottom;
     this.ivTexTop = top;
+    this._setTexInfo();
 };
 
 // specify element region by pixel positions (between 0 to image resolutions)
@@ -42,6 +45,7 @@ SpriteRenderable.prototype.setElementPixelPositions = function (left, right, bot
     this.ivTexRight = right / imageW;
     this.ivTexBottom = bottom / imageH;
     this.ivTexTop = top / imageH;
+    this._setTexInfo();
 };
 
 SpriteRenderable.prototype.getElementUVCoordinateArray = function () {
