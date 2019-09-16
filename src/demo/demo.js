@@ -91,7 +91,11 @@ Demo.prototype.draw = function () {
 // the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
+    var zoomDelta = 0.05;
     var msg = "[L/R: Left or Right Minion; H: Dye; B: Brain]: ";
+    
+    // for smoother camera movements
+    this.ivCamera.update();
 
     this.ivLMinion.update();
     this.ivRMinion.update();
