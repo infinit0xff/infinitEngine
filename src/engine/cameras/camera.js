@@ -1,8 +1,7 @@
 "use strict";
 
 function Camera(wcCenter, wcWidth, viewportArray) {
-    this.ivWCCenter = wcCenter;
-    this.ivWCWidth = wcWidth;
+    this.ivCameraState = new CameraState(wcCenter, wcWidth);
     this.ivViewport = viewportArray; // [x, y, width, height]
     this.ivNearPlane = 0;
     this.ivFarPlane = 1000;
@@ -17,19 +16,25 @@ function Camera(wcCenter, wcWidth, viewportArray) {
 
 }
 
+Camera.eViewport = Object.freeze({
+    eOrgX: 0,
+    eOrgY: 1,
+    eWidth: 2,
+    eHeight: 3
+});
+
 // setter and getter WC and viewport
 Camera.prototype.setWCCenter = function(xPos, yPos) {
-    this.ivWCCenter[0] = xPos;
-    this.ivWCCenter[1] = yPos;
+    var p = vec2.fromValues(xPos, yPos);
+    this.ivCameraState.setCenter(p);
 
 };
-Camera.prototype.getWCCenter = function() { return this.ivWCCenter}
 
-Camera.prototype.setWCWidth = function(width) { this.ivWCWidth = width; }
-Camera.prototype.getWCWidth = function () { return this.ivWCWidth; };
-
-Camera.prototype.getWCHeight = function () { return this.ivWCWidth * this.ivViewport[3] / this.ivViewport[2]; };
-
+Camera.prototype.getWCCenter = function () { return this.ivCameraState.getCenter(); };
+Camera.prototype.setWCWidth = function (width) { this.ivCameraState.setWidth(width); };
+Camera.prototype.getWCWidth = function () { return this.ivCameraState.getWidth(); };
+Camera.prototype.getWCHeight = function () { return this.ivCameraState.getWidth() * this.ivViewport[Camera.eViewport.eHeight] / this.ivViewport[Camera.eViewport.eWidth]; };
+   
 Camera.prototype.setViewport = function(viewportArray) {
     this.ivViewport = viewportArray; };
 Camera.prototype.getViewport = function() { return this.ivViewport; };
@@ -76,15 +81,15 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
 
     // set up the View-Projection transform operator
     // define the view matrix
+    var center = this.getWCCenter();
     mat4.lookAt(this.ivViewMatrix,
-        // WC center
-        [this.ivWCCenter[0], this.ivWCCenter[1], 10],
-        [this.ivWCCenter[0], this.ivWCCenter[1], 0],
+        [center[0], center[1], 10],   // WC center
+        [center[0], center[1], 0],    // 
          // orientation
         [0, 1, 0]);
 
     // define the projection matrix
-    var halfWCWidth = 0.5 * this.ivWCWidth;
+    var halfWCWidth = 0.5 * this.getWCWidth();
     var halfWCHeight = 0.5 * this.getWCHeight(); // 
     mat4.ortho(this.ivProjMatrix,
         -halfWCWidth,   // distant to left of WC
