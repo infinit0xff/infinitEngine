@@ -39,6 +39,8 @@ TextureRenderable.prototype.setColorArray = function () {
 };
 
 TextureRenderable.prototype._pixelAlphaValue = function (x, y) {
+    y += this.ivTexBottomIndex;
+    x += this.ivTexLeftIndex;
     x = x * 4;
     y = y * 4;
     return this.ivColorArray[(y * this.ivTextureInfo.ivWidth) + x  + 3];
