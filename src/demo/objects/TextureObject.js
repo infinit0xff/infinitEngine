@@ -12,22 +12,6 @@ function TextureObject(texture, x, y, w, h) {
 }
 infinitEngine.Core.inheritPrototype(TextureObject, GameObject);
 
-TextureObject.prototype.update = function (up, down, left, right) {
-    var xform = this.getXform();
-    if (infinitEngine.Input.isKeyPressed(up)) {
-        xform.incYPosBy(this.kDelta);
-    }
-    if (infinitEngine.Input.isKeyPressed(down)) {
-        xform.incYPosBy(-this.kDelta);
-    }
-    if (infinitEngine.Input.isKeyPressed(left)) {
-        xform.incXPosBy(-this.kDelta);
-    }
-    if (infinitEngine.Input.isKeyPressed(right)) {
-        xform.incXPosBy(this.kDelta);
-    }
-};
-
 TextureObject.prototype.update = function (up, down, left, right, rot) {
     var xform = this.getXform();
     if (infinitEngine.Input.isKeyPressed(up)) {
