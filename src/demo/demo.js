@@ -10,20 +10,29 @@ function Demo() {
 
     this.ivMsg = null;
 
-    this.ivCollector = null;
-    this.ivPortal = null;
+   // the hero and the support objects
+   this.ivHero = null;
+   this.ivBrain = null;
+   this.ivPortalHit = null;
+   this.ivHeroHit = null;
+
+   this.ivPortal = null;
+   this.ivLMinion = null;
+   this.ivRMinion = null;
+
+   this.ivCollide = null;
+   this.ivChoice = 'H';
 }
+
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
-    infinitEngine.Textures.loadTexture(this.kMinionCollector);
     infinitEngine.Textures.loadTexture(this.kMinionPortal);
 };
 
 Demo.prototype.unloadScene = function () {
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
-    infinitEngine.Textures.unloadTexture(this.kMinionCollector);
     infinitEngine.Textures.unloadTexture(this.kMinionPortal);
 };
 
@@ -37,16 +46,27 @@ Demo.prototype.initialize = function () {
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
             // sets the background to gray
 
-    this.ivDyePack = new DyePack(this.kMinionSprite);
-    this.ivDyePack.setVisibility(false);
+    this.ivBrain = new Brain(this.kMinionSprite);
 
-    this.ivCollector = new TextureObject(this.kMinionCollector, 50, 30, 30, 30);
-    this.ivPortal = new TextureObject(this.kMinionPortal, 70, 30, 10, 10);
-
+    // Step D: Create the hero object with texture from the lower-left corner 
+    this.ivHero = new Hero(this.kMinionSprite);
+        
+    this.ivPortalHit = new DyePack(this.kMinionSprite);
+    this.ivPortalHit.setVisibility(false);
+    this.ivHeroHit = new DyePack(this.kMinionSprite);
+    this.ivHeroHit.setVisibility(false);
+        
+    this.ivPortal = new TextureObject(this.kMinionPortal, 50, 30, 10, 10);
+        
+    this.ivLMinion = new Minion(this.kMinionSprite, 30, 30);
+    this.ivRMinion = new Minion(this.kMinionSprite, 70, 30);
+        
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([0, 0, 0, 1]);
     this.ivMsg.getXform().setPosition(1, 2);
     this.ivMsg.setTextHeight(3);
+        
+    this.ivCollide = this.ivHero;
 };
 
 // this is the draw function, make sure to setup proper drawing environment, and more
@@ -58,34 +78,68 @@ Demo.prototype.draw = function () {
     // activate the drawing Camera
     this.ivCamera.setupViewProjection();
 
-    // draw everything
-    this.ivCollector.draw(this.ivCamera);
-    this.ivPortal.draw(this.ivCamera);
-    this.ivDyePack.draw(this.ivCamera);
-    this.ivMsg.draw(this.ivCamera);
+     // Step  C: Draw everything
+     this.ivHero.draw(this.ivCamera);
+     this.ivBrain.draw(this.ivCamera);
+     this.ivPortal.draw(this.ivCamera);
+     this.ivLMinion.draw(this.ivCamera);
+     this.ivRMinion.draw(this.ivCamera);
+     this.ivPortalHit.draw(this.ivCamera);
+     this.ivHeroHit.draw(this.ivCamera);
+     this.ivMsg.draw(this.ivCamera);
 };
 
 // the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "No Collision";
+    var msg = "[L/R: Left or Right Minion; H: Dye; B: Brain]: ";
 
-    this.ivCollector.update(infinitEngine.Input.keys.W, infinitEngine.Input.keys.S,
-        infinitEngine.Input.keys.A, infinitEngine.Input.keys.D, infinitEngine.Input.keys.E);
+    this.ivLMinion.update();
+    this.ivRMinion.update();
+
+    this.ivHero.update();
+
     this.ivPortal.update(infinitEngine.Input.keys.Up, infinitEngine.Input.keys.Down,
         infinitEngine.Input.keys.Left, infinitEngine.Input.keys.Right, infinitEngine.Input.keys.P);
 
     var h = [];
 
-    // portal's resolution is 1/16 x 1/16 that of Collector!
-    // if (this.ivCollector.pixelTouches(this.ivPortal, h)) {  // <-- VERY EXPENSIVE!!
-    if (this.ivPortal.pixelTouches(this.ivCollector, h)) {
-        msg = "Collided!: (" + h[0].toPrecision(4) + " " + h[1].toPrecision(4) + ")";
-        this.ivDyePack.setVisibility(true);
-        this.ivDyePack.getXform().setXPos(h[0]);
-        this.ivDyePack.getXform().setYPos(h[1]);
+    // Portal intersects with which ever is selected
+    if (this.ivPortal.pixelTouches(this.ivCollide, h)) {
+        this.ivPortalHit.setVisibility(true);
+        this.ivPortalHit.getXform().setXPos(h[0]);
+        this.ivPortalHit.getXform().setYPos(h[1]);
     } else {
-        this.ivDyePack.setVisibility(false);
+        this.ivPortalHit.setVisibility(false);
     }
-    this.ivMsg.setText(msg);
+
+    // hero always collide with Brain (Brain chases hero)
+    if (!this.ivHero.pixelTouches(this.ivBrain, h)) {
+        this.ivBrain.rotateObjPointTo(this.ivHero.getXform().getPosition(), 0.05);
+        GameObject.prototype.update.call(this.ivBrain);
+        this.ivHeroHit.setVisibility(false);
+    } else {
+        this.ivHeroHit.setVisibility(true);
+        this.ivHeroHit.getXform().setPosition(h[0], h[1]);
+    }
+
+    // decide which to collide
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.L)) {
+        this.ivCollide = this.ivLMinion;
+        this.ivChoice = 'L';
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.R)) {
+        this.ivCollide = this.ivRMinion;
+        this.ivChoice = 'R';
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.B)) {
+        this.ivCollide = this.ivBrain;
+        this.ivChoice = 'B';
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
+        this.ivCollide = this.ivHero;
+        this.ivChoice = 'H';
+    }
+
+    this.ivMsg.setText(msg + this.ivChoice);
 };
