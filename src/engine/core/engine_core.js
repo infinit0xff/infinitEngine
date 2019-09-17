@@ -64,7 +64,7 @@ infinitEngine.Core = (function() {
         infinitEngine.VertexBuffer.initialize();
 
         // initialize input
-        infinitEngine.Input.initialize();
+        infinitEngine.Input.initialize(htmlCanvasID);
 
         infinitEngine.AudioClips.initAudioContext();
 
