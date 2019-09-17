@@ -1,9 +1,15 @@
 "use strict";
 
-function Camera(wcCenter, wcWidth, viewportArray) {
+function Camera(wcCenter, wcWidth, viewportArray, bound) {
     this.ivCameraState = new CameraState(wcCenter, wcWidth);
     this.ivCameraShake = null;
-    this.ivViewport = viewportArray; // [x, y, width, height]
+    this.ivViewport = [];  // [x, y, width, height]
+    this.ivViewportBound = 0;
+    if (bound !== undefined) {
+        this.ivViewportBound = bound;
+    }
+    this.ivScissorBound = [];  // use for bounds
+    this.setViewport(viewportArray, this.ivViewportBound);
     this.ivNearPlane = 0;
     this.ivFarPlane = 1000;
 
@@ -36,10 +42,29 @@ Camera.prototype.setWCWidth = function (width) { this.ivCameraState.setWidth(wid
 Camera.prototype.getWCWidth = function () { return this.ivCameraState.getWidth(); };
 Camera.prototype.getWCHeight = function () { return this.ivCameraState.getWidth() * this.ivViewport[Camera.eViewport.eHeight] / this.ivViewport[Camera.eViewport.eWidth]; };
    
-Camera.prototype.setViewport = function(viewportArray) {
-    this.ivViewport = viewportArray; };
-Camera.prototype.getViewport = function() { return this.ivViewport; };
+Camera.prototype.setViewport = function (viewportArray, bound) {
+    if (bound === undefined) {
+        bound = this.ivViewportBound;
+    }
+    // [x, y, width, height]
+    this.ivViewport[0] = viewportArray[0] + bound;
+    this.ivViewport[1] = viewportArray[1] + bound;
+    this.ivViewport[2] = viewportArray[2] - (2 * bound);
+    this.ivViewport[3] = viewportArray[3] - (2 * bound);
+    this.ivScissorBound[0] = viewportArray[0];
+    this.ivScissorBound[1] = viewportArray[1];
+    this.ivScissorBound[2] = viewportArray[2];
+    this.ivScissorBound[3] = viewportArray[3];
+};
 
+Camera.prototype.getViewport = function () {
+    var out = [];
+    out[0] = this.ivScissorBound[0];
+    out[1] = this.ivScissorBound[1];
+    out[2] = this.ivScissorBound[2];
+    out[3] = this.ivScissorBound[3];
+    return out;
+};
 Camera.prototype.setBackgroundColor = function(newColor) {
     this.ivBgColor = newColor; };
 Camera.prototype.getBackgroundColor = function() { return this.ivBgColor; };
