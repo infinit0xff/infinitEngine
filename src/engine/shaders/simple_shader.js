@@ -16,6 +16,9 @@ function SimpleShader(vertexShaderPath, fragmentShaderPath) {
     // reference compiled shader webgl context
     this.ivSharedVertexPositionAttribute = null;
 
+    this.ivGlobalAmbientColor = null;
+    this.ivGlobalAmbientIntensity = null;
+
     var gl = infinitEngine.Core.getGL();
 
     // constructor code below
@@ -53,7 +56,9 @@ function SimpleShader(vertexShaderPath, fragmentShaderPath) {
     this.ivPixelColor = gl.getUniformLocation(this.ivCompiledShader, "uPixelColor");
     this.ivModelTransform = gl.getUniformLocation(this.ivCompiledShader,
         "uModelTransform");
-    this.ivViewProjTransform = gl.getUniformLocation(this.ivCompiledShader, "uViewProjTransform")
+    this.ivViewProjTransform = gl.getUniformLocation(this.ivCompiledShader, "uViewProjTransform");
+    this.ivGlobalAmbientColor = gl.getUniformLocation(this.ivCompiledShader, "uGlobalAmbientColor");
+    this.ivGlobalAmbientIntensity = gl.getUniformLocation(this.ivCompiledShader, "uGlobalAmbientIntensity");
 }
 
 // accessor for shader
@@ -68,6 +73,8 @@ SimpleShader.prototype.activateShader = function(pixelColor, aCamera) {
     gl.uniformMatrix4fv(this.ivViewProjTransform, false, aCamera.getVPMatrix());
     gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
     gl.uniform4fv(this.ivPixelColor, pixelColor);
+    gl.uniform4fv(this.ivGlobalAmbientColor, infinitEngine.DefaultResources.getGlobalAmbientColor());
+    gl.uniform1f(this.ivGlobalAmbientIntensity, infinitEngine.DefaultResources.getGlobalAmbientIntensity());
 };
 
 // load per object model transform
