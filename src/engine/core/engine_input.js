@@ -59,6 +59,13 @@ infinitEngine.Input = (function() {
     
     };
 
+     
+    var kMouseButton = {
+        Left: 0,
+        Middle: 1,
+        Right: 2
+    };
+    
     // previous key state
     var ivKeyPreviousState = [];
 
@@ -69,6 +76,14 @@ infinitEngine.Input = (function() {
     // once an event is set, it will remain there until polled
     var ivIsKeyClicked = [];
 
+    // support mouse
+    var ivCanvas = null;
+    var ivButtonPreviousState = [];
+    var ivIsButtonPressed = [];
+    var ivIsButtonClicked = [];
+    var ivMousePosX = -1;
+    var ivMousePosY = -1;
+
     var _onKeyDown = function(event) {
         ivIsKeyPressed[event.keyCode] = true; 
     }
@@ -77,7 +92,34 @@ infinitEngine.Input = (function() {
         ivIsKeyPressed[event.keyCode] = false; 
     }
     
-    var initialize = function() {
+    var _onMouseMove = function (event) {
+        var inside = false;
+        var bBox = ivCanvas.getBoundingClientRect();
+        // in canvas Space now. convert via ratio from canvas to client.
+        var x = Math.round((event.clientX - bBox.left) * (ivCanvas.width / bBox.width));
+        var y = Math.round((event.clientY - bBox.top) * (ivCanvas.width / bBox.width));
+
+        if ((x >= 0) && (x < ivCanvas.width) &&
+            (y >= 0) && (y < ivCanvas.height)) {
+            ivMousePosX = x;
+            ivMousePosY = ivCanvas.height - 1 - y;
+            inside = true;
+        }
+        return inside;
+    };
+
+    var _onMouseDown = function (event) {
+        if (_onMouseMove(event)) {
+            ivIsButtonPressed[event.button] = true;
+        }
+    };
+
+    var _onMouseUp = function (event) {
+        _onMouseMove(event);
+        ivIsButtonPressed[event.button] = false;
+    };
+
+    var initialize = function(canvasID) {
         var i;
         for(i = 0; i< kKeys.LastKeyCode; i++) {
             ivIsKeyPressed[i] = false;
@@ -88,6 +130,18 @@ infinitEngine.Input = (function() {
         // register handers 
         window.addEventListener('keyup', _onKeyUp);
         window.addEventListener('keydown', _onKeyDown);
+        
+        for (i = 0; i < 3; i++) {
+            ivButtonPreviousState[i] = false;
+            ivIsButtonPressed[i] = false;
+            ivIsButtonClicked[i] = false;
+        }
+
+        window.addEventListener('mousedown', _onMouseDown);
+        window.addEventListener('mouseup', _onMouseUp);
+        window.addEventListener('mousemove', _onMouseMove);
+        
+        ivCanvas = document.getElementById(canvasID);
     };
 
     var update = function() {
@@ -95,6 +149,10 @@ infinitEngine.Input = (function() {
         for (i = 0; i< kKeys.LastKeyCode; i++) {
             ivIsKeyClicked[i] = (!ivKeyPreviousState[i]) && ivIsKeyPressed[i];
             ivKeyPreviousState[i] = ivIsKeyPressed[i];
+        }
+        for (i = 0; i < 3; i++) {
+            ivIsButtonClicked[i] = (!ivButtonPreviousState[i]) && ivIsButtonPressed[i];
+            ivButtonPreviousState[i] = ivIsButtonPressed[i];
         }
     };
 
@@ -106,14 +164,35 @@ infinitEngine.Input = (function() {
         return (ivIsKeyClicked[keyCode]);
     }
 
+    var isButtonPressed = function (button) {
+        return ivIsButtonPressed[button];
+    };
+
+    var isButtonClicked = function (button) {
+        return ivIsButtonClicked[button];
+    };
+
+    var getMousePosX = function () { return ivMousePosX; };
+    var getMousePosY = function () { return ivMousePosY; };
 
     var ivPublic = {
         initialize: initialize,
         update: update,
+
+        // keyboard support
         isKeyPressed: isKeyPressed,
         isKeyClicked: isKeyClicked,
-        keys: kKeys
+        keys: kKeys,
+        
+        // mouse support
+        isButtonPressed: isButtonPressed,
+        isButtonClicked: isButtonClicked,
+        getMousePosX: getMousePosX,       // invalid if no corresponding buttonPressed or buttonClicked
+        getMousePosY: getMousePosY,
+        mouseButton: kMouseButton
+
     };
 
     return ivPublic;
+
 }());
