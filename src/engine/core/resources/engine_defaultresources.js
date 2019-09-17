@@ -4,6 +4,15 @@ var infinitEngine = infinitEngine || {};
 
 infinitEngine.DefaultResources = (function() {
     
+    // Global Ambient color
+    var ivGlobalAmbientColor = [0.3, 0.3, 0.3, 1];
+    var ivGlobalAmbientIntensity = 1;
+    var getGlobalAmbientIntensity = function () { return ivGlobalAmbientIntensity; };
+    var setGlobalAmbientIntensity = function (v) { ivGlobalAmbientIntensity = v; };
+    var getGlobalAmbientColor = function () { return ivGlobalAmbientColor; };
+    var setGlobalAmbientColor = function (v) { ivGlobalAmbientColor = vec4.fromValues(v[0], v[1], v[2], v[3]); };
+
+
     // simple shader glsl shader file paths
      
     // path to the VertexShader
@@ -84,6 +93,10 @@ infinitEngine.DefaultResources = (function() {
         getTextureShader: getTextureShader,
         getSpriteShader: getSpriteShader,
         getDefaultFont: getDefaultFont,
+        getGlobalAmbientColor: getGlobalAmbientColor,
+        setGlobalAmbientColor: setGlobalAmbientColor,
+        getGlobalAmbientIntensity: getGlobalAmbientIntensity,
+        setGlobalAmbientIntensity: setGlobalAmbientIntensity,
         cleanUp: cleanUp
     };
 
