@@ -80,21 +80,15 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
     // configure the viewport
     // set up the viewport: area on canvas to be drawn
     gl.viewport(this.ivViewport[0], // x position of bottom-left corner
-    this.ivViewport[1],
-    this.ivViewport[2],
-    this.ivViewport[3]);
-    // y position of bottom-left corner
-    // width of the area to be drawn
-    // height of the area to be drawn
+                this.ivViewport[1], // y position of bottom-left corner
+                this.ivViewport[2], // width of the area to be drawn
+                this.ivViewport[3]);// height of the area to be drawn
 
     // set up the corresponding scissor area to limit clear area
-    gl.scissor( this.ivViewport[0], // x position of bottom-left corner
-    this.ivViewport[1],
-    this.ivViewport[2],
-    this.ivViewport[3]);
-    // y position of bottom-left corner
-    // width of the area to be drawn
-    // height of the area to be drawn
+    gl.scissor(this.ivScissorBound[0], // x position of bottom-left corner of the area to be drawn
+        this.ivScissorBound[1], // y position of bottom-left corner of the area to be drawn
+        this.ivScissorBound[2], // width of the area to be drawn
+        this.ivScissorBound[3]);// height of the area to be drawn
 
     // set the color to be clear to black
     gl.clearColor(this.ivBgColor[0], this.ivBgColor[1],
