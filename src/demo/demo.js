@@ -155,5 +155,10 @@ Demo.prototype.update = function () {
     this.ivCamera.clampAtBoundary(this.ivPortal.getXform(), 0.8);
     this.ivCamera.panWith(this.ivHero.getXform(), 0.9);
 
+    // camera shake effect
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Q)) {
+        this.ivCamera.shake(-2, -2, 20, 30);
+    }
+
     this.ivMsg.setText(msg + this.ivChoice);
 };
