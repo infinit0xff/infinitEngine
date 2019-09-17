@@ -43,7 +43,7 @@ Demo.prototype.initialize = function () {
     this.ivCamera = new Camera(
         vec2.fromValues(50, 36), // position of the camera
         100,                       // width of camera
-        [0, 0, 640, 480]           // viewport (orgX, orgY, width, height)
+        [0, 0, 640, 330]           // viewport (orgX, orgY, width, height)
     );
 
     // sets the background to gray
@@ -55,14 +55,14 @@ Demo.prototype.initialize = function () {
         [490, 330, 150, 150],
         2                           // viewport bounds
     );
-    this.ivHeroCam.setBackgroundColor([0.5, 0.5, 0.5, 1]);
+    this.ivHeroCam.setBackgroundColor([0.85, 0.8, 0.8, 1]);
     this.ivBrainCam = new Camera(
         vec2.fromValues(50, 30),    // will be updated at each cycle to point to the brain
         10,
         [0, 330, 150, 150],
         2                           // viewport bounds
     );
-    this.ivBrainCam.setBackgroundColor([1, 1, 1, 1]);
+    this.ivBrainCam.setBackgroundColor([0.8, 0.8, 0.85, 1]);
     this.ivBrainCam.configInterpolation(0.7, 10);
 
     // large background image
@@ -82,7 +82,7 @@ Demo.prototype.initialize = function () {
 
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([1, 1, 1, 1]);
-    this.ivMsg.getXform().setPosition(2, 4);
+    this.ivMsg.getXform().setPosition(1, 14);
     this.ivMsg.setTextHeight(3);
 };
 
@@ -188,13 +188,30 @@ Demo.prototype.update = function () {
      this.ivHeroCam.panTo(this.ivHero.getXform().getXPos(), this.ivHero.getXform().getYPos());
      this.ivBrainCam.panTo(this.ivBrain.getXform().getXPos(), this.ivBrain.getXform().getYPos());
  
-     // move the hero cam viewport just to show it is possible
-     var v = this.ivHeroCam.getViewport();
-     v[0] += 1;
-     if (v[0] > 500) {
-         v[0] = 0;
+     msg = "";
+     // testing the mouse input
+     if (infinitEngine.Input.isButtonPressed(infinitEngine.Input.mouseButton.Left)) {
+         msg += "[L Down]";
+         if (this.ivCamera.isMouseInViewport()) {
+             this.ivPortal.getXform().setXPos(this.ivCamera.mouseWCX());
+             this.ivPortal.getXform().setYPos(this.ivCamera.mouseWCY());
+         }
      }
-     this.ivHeroCam.setViewport(v);
-
-    this.ivMsg.setText(msg + this.ivChoice);
+ 
+     if (infinitEngine.Input.isButtonPressed(infinitEngine.Input.mouseButton.Middle)) {
+         if (this.ivHeroCam.isMouseInViewport()) {
+             this.ivHero.getXform().setXPos(this.ivHeroCam.mouseWCX());
+             this.ivHero.getXform().setYPos(this.ivHeroCam.mouseWCY());
+         }
+     }
+     if (infinitEngine.Input.isButtonClicked(infinitEngine.Input.mouseButton.Right)) {
+         this.ivPortal.setVisibility(false);
+     }
+ 
+     if (infinitEngine.Input.isButtonClicked(infinitEngine.Input.mouseButton.Middle)) {
+         this.ivPortal.setVisibility(true);
+     }
+ 
+     msg += " X=" + infinitEngine.Input.getMousePosX() + " Y=" + infinitEngine.Input.getMousePosY();
+     this.ivMsg.setText(msg);
 };
