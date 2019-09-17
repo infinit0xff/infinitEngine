@@ -1,6 +1,14 @@
 "use strict";
 
 Camera.prototype.update = function () {
+    if (this.ivCameraShake !== null) {
+        if (this.ivCameraShake.shakeDone()) {
+            this.ivCameraShake = null;
+        } else {
+            this.ivCameraShake.setRefCenter(this.getWCCenter());
+            this.ivCameraShake.updateShakeState();
+        }
+    }
     this.ivCameraState.updateCameraState();
 };
 
@@ -65,4 +73,9 @@ Camera.prototype.zoomTowards = function (pos, zoom) {
 
 Camera.prototype.configInterpolation = function (stiffness, duration) {
     this.ivCameraState.configInterpolation(stiffness, duration);
+};
+
+Camera.prototype.shake = function (xDelta, yDelta, shakeFrequency, duration) {
+    this.ivCameraShake  = new CameraShake(this.ivCameraState, xDelta, yDelta,
+        shakeFrequency, duration);
 };
