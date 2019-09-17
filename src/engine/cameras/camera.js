@@ -2,6 +2,7 @@
 
 function Camera(wcCenter, wcWidth, viewportArray) {
     this.ivCameraState = new CameraState(wcCenter, wcWidth);
+    this.ivCameraShake = null;
     this.ivViewport = viewportArray; // [x, y, width, height]
     this.ivNearPlane = 0;
     this.ivFarPlane = 1000;
@@ -81,7 +82,12 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
 
     // set up the View-Projection transform operator
     // define the view matrix
-    var center = this.getWCCenter();
+    var center = [];
+    if (this.ivCameraShake !== null) {
+        center = this.ivCameraShake.getCenter();
+    } else {
+        center = this.getWCCenter();
+    }
     mat4.lookAt(this.ivViewMatrix,
         [center[0], center[1], 10],   // WC center
         [center[0], center[1], 0],    // 
