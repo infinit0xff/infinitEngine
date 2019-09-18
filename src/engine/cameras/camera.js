@@ -1,5 +1,12 @@
 "use strict";
 
+// information to be updated once per render for efficiency concerns
+function PerRenderCache() {
+    this.ivWCToPixelRatio = 1;  // WC to pixel transformation
+    this.ivCameraOrgX = 1; // Lower-left corner of camera in WC 
+    this.ivCameraOrgY = 1;
+}
+
 function Camera(wcCenter, wcWidth, viewportArray, bound) {
     this.ivCameraState = new CameraState(wcCenter, wcWidth);
     this.ivCameraShake = null;
@@ -21,6 +28,13 @@ function Camera(wcCenter, wcWidth, viewportArray, bound) {
     // background color
     this.ivBgColor = [0.8, 0.8, 0.8,1] // rbg alpha
 
+    // per-rendering cached information
+    // needed for computing transforms for shaders
+    // updated each time in SetupViewProjection()
+    this.ivRenderCache = new PerRenderCache();
+        // SHOULD NOT be used except 
+        // xform operations during the rendering
+        // Client game should not access this!
 }
 
 Camera.eViewport = Object.freeze({
@@ -127,6 +141,12 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
 
     // concatnate view and project matrices
     mat4.multiply(this.ivVPMatrix, this.ivProjMatrix, this.ivViewMatrix);
+    
+    // Step B4: compute and cache per-rendering information
+    this.ivRenderCache.ivWCToPixelRatio = this.ivViewport[Camera.eViewport.eWidth] / this.getWCWidth();
+    this.ivRenderCache.ivCameraOrgX = center[0] - (this.getWCWidth() / 2);
+    this.ivRenderCache.ivCameraOrgY = center[1] - (this.getWCHeight() / 2);
+
 };
 
 Camera.prototype.collideWCBound = function (aXform, zone) {
