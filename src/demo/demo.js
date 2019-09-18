@@ -15,11 +15,13 @@ function Demo() {
     this.ivLMinion = null;
     this.ivRMinion = null;
 
-    this.ivTheLight = null;
+    this.ivGlobalLightSet = null;
 
     // to verify swiitching between shaders is fine
     this.ivBlock1 = null;
     this.ivBlock2 = null;
+    this.ivLgtIndex = 0;    // the light to move
+
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
@@ -42,32 +44,35 @@ Demo.prototype.initialize = function () {
     );
     // sets the background to gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
-
-    // the light
-    this.ivTheLight = new Light();
-    this.ivTheLight.setRadius(8);
-    this.ivTheLight.setZPos(2);
-    this.ivTheLight.setXPos(30);
-    this.ivTheLight.setYPos(30);  // Position above LMinion
-    this.ivTheLight.setColor([0.9, 0.9, 0.2, 1]);
+   
+    this._initializeLights();   // defined in demo_lights.js
 
     // the Background
     var bgR = new LightRenderable(this.kBg);
     bgR.setElementPixelPositions(0, 1024, 0, 1024);
     bgR.getXform().setSize(100, 100);
     bgR.getXform().setPosition(50, 35);
-    bgR.addLight(this.ivTheLight);
+    var i;
+    for (i = 0; i < 4; i++) {
+        bgR.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
+    }
     this.ivBg = new GameObject(bgR);
 
-    // 
     // the objects
     this.ivHero = new Hero(this.kMinionSprite);
-    this.ivHero.getRenderable().addLight(this.ivTheLight);
+    this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(0));   // hero light
+    this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
+    // Uncomment the following to see how light affects Dye
+    //      this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(1)); 
+    //      this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(2)); 
 
-    this.ivLMinion = new Minion(this.kMinionSprite, 30, 30);
-    this.ivLMinion.getRenderable().addLight(this.ivTheLight);
+    this.ivLMinion = new Minion(this.kMinionSprite, 17, 15);
+    this.ivLMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(1));   // LMinion light
+    this.ivLMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
 
-    this.ivRMinion = new Minion(this.kMinionSprite, 70, 30);
+    this.ivRMinion = new Minion(this.kMinionSprite, 87, 15);
+    this.ivRMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(2));   // RMinion light
+    this.ivRMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
 
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([1, 1, 1, 1]);
@@ -87,81 +92,43 @@ Demo.prototype.initialize = function () {
 
 
 Demo.prototype.drawCamera = function (camera) {
-    // set up the View Projection matrix
-    camera.setupViewProjection();
 
-    // now draws each Renderable
+    // Step A: set up the View Projection matrix
+    camera.setupViewProjection();
+    // Step B: Now draws each primitive
     this.ivBg.draw(camera);
     this.ivBlock1.draw(camera);
     this.ivLMinion.draw(camera);
-    this.ivRMinion.draw(camera);
     this.ivBlock2.draw(camera);
     this.ivHero.draw(camera);
+    this.ivRMinion.draw(camera);
 };
 
-// this is the draw function, make sure to setup proper drawing environment, and more
+// This is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
     // Step A: clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // draw with all three cameras
+    // Step  B: Draw with all three cameras
     this.drawCamera(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
 };
 
-// the update function, updates the application state. Make sure to _NOT_ draw
+// The Update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg, i, c;
-    var deltaC = 0.01;
-    var deltaZ = 0.05;
+    var msg = "Selected Light=" + this.mLgtIndex + " ";
 
     this.ivCamera.update();  // to ensure proper interpolated movement effects
+
     this.ivLMinion.update(); // ensure sprite animation
     this.ivRMinion.update();
+
     this.ivHero.update();  // allow keyboard control to move
 
-    if (infinitEngine.Input.isButtonPressed(infinitEngine.Input.mouseButton.Left)) {
-        this.ivTheLight.set2DPosition(this.ivHero.getXform().getPosition());
-    }
+    // control the selected light
+    msg += this._lightControl();
 
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
-        c = this.ivTheLight.getColor();
-        for (i = 0; i < 4; i++) {
-            c[i] += deltaC;
-        }
-    }
-
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
-        c = this.ivTheLight.getColor();
-        for (i = 0; i < 4; i++) {
-            c[i] -= deltaC;
-        }
-    }
-    
-    var p = this.ivTheLight.getPosition(), r;
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Z)) {
-        p[2] += deltaZ;
-    }
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.X)) {
-        p[2] -= deltaZ;
-    }
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.C)) {
-        r = this.ivTheLight.getRadius();
-        r += deltaC;
-        this.ivTheLight.setRadius(r);
-    }
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.V)) {
-        r = this.ivTheLight.getRadius();
-        r -= deltaC;
-        this.ivTheLight.setRadius(r);
-    }
-    
-    c = this.ivTheLight.getColor();
-    msg = "LightColor:" + c[0].toPrecision(4) + " " + c[1].toPrecision(4) +
-                    " " + c[2].toPrecision(4) + " " + c[3].toPrecision(4) +
-          " Z=" + p[2].toPrecision(3) +
-          " r=" + this.ivTheLight.getRadius().toPrecision(3);
     this.ivMsg.setText(msg);
 };
