@@ -5,8 +5,8 @@ function Hero(spriteTexture) {
 
     this.ivDye = new LightRenderable(spriteTexture);
     this.ivDye.setColor([1, 1, 1, 0]);
-    this.ivDye.getXform().setPosition(35, 50);
-    this.ivDye.getXform().setSize(9, 12);
+    this.ivDye.getXform().setPosition(15, 50);
+    this.ivDye.getXform().setSize(18, 24);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
 }
