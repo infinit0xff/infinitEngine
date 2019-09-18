@@ -2,7 +2,7 @@
 
 function Minion(spriteTexture, atX, atY) {
     this.kDelta = 0.2;
-    this.ivMinion = new SpriteAnimateRenderable(spriteTexture);
+    this.ivMinion = new LightRenderable(spriteTexture);
     this.ivMinion.setColor([1, 1, 1, 0]);
     this.ivMinion.getXform().setPosition(atX, atY);
     this.ivMinion.getXform().setSize(12, 9.6);

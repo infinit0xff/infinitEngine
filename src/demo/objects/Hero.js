@@ -3,7 +3,7 @@
 function Hero(spriteTexture) {
     this.kDelta = 0.3;
 
-    this.ivDye = new SpriteRenderable(spriteTexture);
+    this.ivDye = new LightRenderable(spriteTexture);
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(35, 50);
     this.ivDye.getXform().setSize(9, 12);
