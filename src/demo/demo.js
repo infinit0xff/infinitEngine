@@ -118,7 +118,7 @@ Demo.prototype.draw = function () {
 // The Update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "Selected Light=" + this.mLgtIndex + " ";
+    var msg = "Selected Light=" + this.ivLgtIndex + " ";
 
     this.ivCamera.update();  // to ensure proper interpolated movement effects
 
