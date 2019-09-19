@@ -7,9 +7,14 @@ function TextureShader(vertexShaderPath, fragmentShaderPath) {
 
     // reference to aTextureCoordinate within the shader
     this.ivShaderTextureCoordAttribute = null;
+    
+    // reference to the uSampler, when using only texture, 
+    // this is not necessary, with NormalMap, we must do this.
+    // this.ivSamplerRef = null;
 
     // get the reference of aTextureCoordinate within the shader
     var gl = infinitEngine.Core.getGL();
+    this.ivSamplerRef = gl.getUniformLocation(this.ivCompiledShader, "uSampler");
     this.ivShaderTextureCoordAttribute = gl.getAttribLocation(this.ivCompiledShader, "aTextureCoordinate");
 }
 // get all the prototype functions from SimpleShader
@@ -25,4 +30,7 @@ TextureShader.prototype.activateShader = function (pixelColor, aCamera) {
     gl.bindBuffer(gl.ARRAY_BUFFER, infinitEngine.VertexBuffer.getGLTexCoordRef());
     gl.enableVertexAttribArray(this.ivShaderTextureCoordAttribute);
     gl.vertexAttribPointer(this.ivShaderTextureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+    // binds to texture unit 0
+    gl.uniform1i(this.ivSamplerRef, 0);
+
 };
