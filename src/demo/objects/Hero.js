@@ -1,9 +1,9 @@
 "use strict";
 
-function Hero(spriteTexture) {
+function Hero(spriteTexture, normalMap) {
     this.kDelta = 0.3;
 
-    this.ivDye = new LightRenderable(spriteTexture);
+    this.ivDye = new IllumRenderable(spriteTexture, normalMap);
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(15, 50);
     this.ivDye.getXform().setSize(18, 24);
