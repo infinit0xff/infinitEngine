@@ -2,7 +2,9 @@
 
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
+    this.kMinionSpriteNormal = "assets/minion_sprite_normal.png";
     this.kBg = "assets/bg.png";
+    this.kBgNormal = "assets/bg_normal.png";
 
     // the camera to view the scene
     this.ivCamera = null;
@@ -17,22 +19,25 @@ function Demo() {
 
     this.ivGlobalLightSet = null;
 
-    // to verify swiitching between shaders is fine
-    this.ivBlock1 = null;
+    this.ivBlock1 = null;   // to verify swiitching between shaders is fine
     this.ivBlock2 = null;
-    this.ivLgtIndex = 0;    // the light to move
 
+    this.ivLgtIndex = 0;    // the light to move
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
     infinitEngine.Textures.loadTexture(this.kBg);
+    infinitEngine.Textures.loadTexture(this.kBgNormal);
+    infinitEngine.Textures.loadTexture(this.kMinionSpriteNormal);
 };
 
 Demo.prototype.unloadScene = function () {
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
     infinitEngine.Textures.unloadTexture(this.kBg);
+    infinitEngine.Textures.unloadTexture(this.kBgNormal);
+    infinitEngine.Textures.unloadTexture(this.kMinionSpriteNormal);
 };
 
 Demo.prototype.initialize = function () {
@@ -44,11 +49,12 @@ Demo.prototype.initialize = function () {
     );
     // sets the background to gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
-   
-    this._initializeLights();   // defined in demo_lights.js
+
+    // the light
+    this._initializeLights();   // defined in MyGame_Lights.js
 
     // the Background
-    var bgR = new LightRenderable(this.kBg);
+    var bgR = new IllumRenderable(this.kBg, this.kBgNormal);
     bgR.setElementPixelPositions(0, 1024, 0, 1024);
     bgR.getXform().setSize(100, 100);
     bgR.getXform().setPosition(50, 35);
@@ -58,19 +64,20 @@ Demo.prototype.initialize = function () {
     }
     this.ivBg = new GameObject(bgR);
 
+    // 
     // the objects
-    this.ivHero = new Hero(this.kMinionSprite);
+    this.ivHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal);
     this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(0));   // hero light
     this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
-    // Uncomment the following to see how light affects Dye
+    // uncomment the following to see how light affects Dye
     //      this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(1)); 
     //      this.ivHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(2)); 
 
-    this.ivLMinion = new Minion(this.kMinionSprite, 17, 15);
+    this.ivLMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 17, 15);
     this.ivLMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(1));   // LMinion light
     this.ivLMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
 
-    this.ivRMinion = new Minion(this.kMinionSprite, 87, 15);
+    this.ivRMinion = new Minion(this.kMinionSprite, null, 87, 15);
     this.ivRMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(2));   // RMinion light
     this.ivRMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(3));   // center light
 
@@ -88,14 +95,14 @@ Demo.prototype.initialize = function () {
     this.ivBlock2.setColor([0, 1, 0, 1]);
     this.ivBlock2.getXform().setSize(5, 5);
     this.ivBlock2.getXform().setPosition(70, 50);
+
 };
 
 
 Demo.prototype.drawCamera = function (camera) {
-
-    // Step A: set up the View Projection matrix
+    // set up the View Projection matrix
     camera.setupViewProjection();
-    // Step B: Now draws each primitive
+    // Now draws each primitive
     this.ivBg.draw(camera);
     this.ivBlock1.draw(camera);
     this.ivLMinion.draw(camera);
@@ -104,21 +111,21 @@ Demo.prototype.drawCamera = function (camera) {
     this.ivRMinion.draw(camera);
 };
 
-// This is the draw function, make sure to setup proper drawing environment, and more
+// this is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
-    // Step A: clear the canvas
+    // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // Step  B: Draw with all three cameras
+    // draw with all three cameras
     this.drawCamera(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
 };
 
-// The Update function, updates the application state. Make sure to _NOT_ draw
+// the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "Selected Light=" + this.ivLgtIndex + " ";
+    var msg = "Light=" + this.ivLgtIndex + " ";
 
     this.ivCamera.update();  // to ensure proper interpolated movement effects
 
