@@ -35,6 +35,10 @@ infinitEngine.DefaultResources = (function() {
     var kLightFS = "src/glsl_shaders/light_fs.glsl";  // Path to the Light FragmentShader
     var ivLightShader = null;
 
+    // Illumination Shader
+    var kIllumFS = "src/glsl_shaders/illum_fs.glsl"; // Path to the Illumination FragmentShader
+    var ivIllumShader = null;
+
     // default font
     var kDefaultFont = "assets/fonts/system-default-font";
     var getDefaultFont = function() { return kDefaultFont; };
@@ -44,6 +48,7 @@ infinitEngine.DefaultResources = (function() {
     var getTextureShader = function () { return ivTextureShader; };
     var getSpriteShader = function () { return ivSpriteShader; };
     var getLightShader = function () { return ivLightShader; };
+    var getIllumShader = function () { return ivIllumShader; };
 
 
     // callback function after loadings are done
@@ -53,7 +58,7 @@ infinitEngine.DefaultResources = (function() {
         ivTextureShader = new TextureShader(kTextureVS, kTextureFS);
         ivSpriteShader =  new SpriteShader(kTextureVS, kTextureFS);
         ivLightShader = new LightShader(kTextureVS, kLightFS);
-
+        ivIllumShader = new IllumShader(kTextureVS, kIllumFS);
         callBackFunction();
     };
 
@@ -73,6 +78,9 @@ infinitEngine.DefaultResources = (function() {
         // Light Shader
         infinitEngine.TextFileLoader.loadTextFile(kLightFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
 
+        // Illumination Shader
+        infinitEngine.TextFileLoader.loadTextFile(kIllumFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+
         // load default font
         infinitEngine.Fonts.loadFont(kDefaultFont);
 
@@ -86,6 +94,8 @@ infinitEngine.DefaultResources = (function() {
         ivTextureShader.cleanUp();
         ivSpriteShader.cleanUp();
         ivLightShader.cleanUp();
+        ivIllumShader.cleanUp();
+
 
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleVS);
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleFS);
@@ -94,8 +104,11 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.unloadTextFile(kTextureVS);
         infinitEngine.TextFileLoader.unloadTextFile(kTextureFS);
 
-         // Light Shader
+        // Light Shader
          infinitEngine.TextFileLoader.unloadTextFile(kLightFS);
+
+        // Illumination Shader
+        infinitEngine.TextFileLoader.unloadTextFile(kIllumFS);
 
         // default font
         infinitEngine.Fonts.unloadFont(kDefaultFont);
@@ -108,6 +121,7 @@ infinitEngine.DefaultResources = (function() {
         getTextureShader: getTextureShader,
         getSpriteShader: getSpriteShader,
         getLightShader: getLightShader,
+        getIllumShader: getIllumShader,
         getDefaultFont: getDefaultFont,
         getGlobalAmbientColor: getGlobalAmbientColor,
         setGlobalAmbientColor: setGlobalAmbientColor,
