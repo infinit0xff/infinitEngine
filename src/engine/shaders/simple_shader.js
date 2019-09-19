@@ -42,16 +42,6 @@ function SimpleShader(vertexShaderPath, fragmentShaderPath) {
     // get reference to aSquareVertexPosition
     this.ivSharedVertexPositionAttribute = gl.getAttribLocation(this.ivCompiledShader,
         "aSquareVertexPosition");
-
-    // activate vertex buffer 
-    gl.bindBuffer(gl.ARRAY_BUFFER, infinitEngine.VertexBuffer.getGLVertexRef());
-    
-    gl.vertexAttribPointer(this.ivSharedVertexPositionAttribute,
-        3,
-        gl.FLOAT,
-        false,
-        0,
-        0);
     
     this.ivPixelColor = gl.getUniformLocation(this.ivCompiledShader, "uPixelColor");
     this.ivModelTransform = gl.getUniformLocation(this.ivCompiledShader,
@@ -71,6 +61,13 @@ SimpleShader.prototype.activateShader = function(pixelColor, aCamera) {
     var gl = infinitEngine.Core.getGL();
     gl.useProgram(this.ivCompiledShader);
     gl.uniformMatrix4fv(this.ivViewProjTransform, false, aCamera.getVPMatrix());
+    gl.bindBuffer(gl.ARRAY_BUFFER, infinitEngine.VertexBuffer.getGLVertexRef());
+    gl.vertexAttribPointer(this.ivShaderVertexPositionAttribute,
+        3,              // each element is a 3-float (x,y.z)
+        gl.FLOAT,       // data type is FLOAT
+        false,          // if the content is normalized vectors
+        0,              // number of bytes to skip in between elements
+        0);             // offsets to the first element
     gl.enableVertexAttribArray(this.ivSharedVertexPositionAttribute);
     gl.uniform4fv(this.ivPixelColor, pixelColor);
     gl.uniform4fv(this.ivGlobalAmbientColor, infinitEngine.DefaultResources.getGlobalAmbientColor());
