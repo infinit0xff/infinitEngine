@@ -11,6 +11,7 @@ function Demo() {
     this.ivBg = null;
 
     this.ivMsg = null;
+    this.ivMatMsg = null;
 
     // the hero and the support objects
     this.ivHero = null;
@@ -23,6 +24,7 @@ function Demo() {
     this.ivBlock2 = null;
 
     this.ivLgtIndex = 0;    // the light to move
+    this.ivSelectedCh = null; // the selected character
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
@@ -58,6 +60,10 @@ Demo.prototype.initialize = function () {
     bgR.setElementPixelPositions(0, 1024, 0, 1024);
     bgR.getXform().setSize(100, 100);
     bgR.getXform().setPosition(50, 35);
+    // set background materal properties
+    bgR.getMaterial().setShininess(100);
+    bgR.getMaterial().setSpecular([1, 0, 0, 1]);
+    
     var i;
     for (i = 0; i < 4; i++) {
         bgR.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
@@ -86,6 +92,11 @@ Demo.prototype.initialize = function () {
     this.ivMsg.getXform().setPosition(1, 2);
     this.ivMsg.setTextHeight(3);
 
+    this.ivMatMsg = new FontRenderable("Status Message");
+    this.ivMatMsg.setColor([1, 1, 1, 1]);
+    this.ivMatMsg.getXform().setPosition(1, 73);
+    this.ivMatMsg.setTextHeight(3);
+
     this.ivBlock1 = new Renderable();
     this.ivBlock1.setColor([1, 0, 0, 1]);
     this.ivBlock1.getXform().setSize(5, 5);
@@ -96,13 +107,15 @@ Demo.prototype.initialize = function () {
     this.ivBlock2.getXform().setSize(5, 5);
     this.ivBlock2.getXform().setPosition(70, 50);
 
+    this.ivSelectedCh = this.ivHero;
+    this.ivSelectedChMsg = "R:";
+    this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();  // to support interactive changing
 };
-
 
 Demo.prototype.drawCamera = function (camera) {
     // set up the View Projection matrix
     camera.setupViewProjection();
-    // Now draws each primitive
+    // now draws each primitive
     this.ivBg.draw(camera);
     this.ivBlock1.draw(camera);
     this.ivLMinion.draw(camera);
@@ -117,25 +130,42 @@ Demo.prototype.draw = function () {
     // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // draw with all three cameras
+    //  draw with all three cameras
     this.drawCamera(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
+    this.ivMatMsg.draw(this.ivCamera);
 };
 
 // the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    var msg = "Light=" + this.ivLgtIndex + " ";
-
     this.ivCamera.update();  // to ensure proper interpolated movement effects
-
     this.ivLMinion.update(); // ensure sprite animation
     this.ivRMinion.update();
-
     this.ivHero.update();  // allow keyboard control to move
-
+    //
     // control the selected light
+    var msg = "L=" + this.ivLgtIndex + " ";
     msg += this._lightControl();
-
     this.ivMsg.setText(msg);
+
+    msg = this._selectCharacter();
+    msg += this.materialControl();
+    this.ivMatMsg.setText(msg);
+};
+
+Demo.prototype._selectCharacter = function () {
+    // select which character to work with
+
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Five)) {
+        this.ivSelectedCh = this.ivLMinion;
+        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
+        this.ivSelectedChMsg = "L:";
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Six)) {
+        this.ivSelectedCh = this.ivHero;
+        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
+        this.ivSelectedChMsg = "H:";
+    }
+    return this.ivSelectedChMsg;
 };
