@@ -33,7 +33,7 @@ infinitEngine.GameLoop = (function() {
             // update only every millesecond per frame
             // if lag larget then update frames, update
             // until caught up
-            while ((ivLagTime >= KFPS) && ivLoopIsRunning) {
+            while ((ivLagTime >= KMPF) && ivLoopIsRunning) {
                 infinitEngine.Input.update();
                 this.update(); // call Demo update
                 ivLagTime -= KMPF;
@@ -79,4 +79,4 @@ infinitEngine.GameLoop = (function() {
         stop: stop
     };
     return ivPublic;
-}());
+})();

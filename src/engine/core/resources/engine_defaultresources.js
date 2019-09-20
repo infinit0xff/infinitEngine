@@ -4,7 +4,7 @@ var infinitEngine = infinitEngine || {};
 
 infinitEngine.DefaultResources = (function() {
     
-    // Global Ambient color
+    // global ambient color
     var ivGlobalAmbientColor = [0.3, 0.3, 0.3, 1];
     var ivGlobalAmbientIntensity = 1;
     var getGlobalAmbientIntensity = function () { return ivGlobalAmbientIntensity; };
@@ -85,7 +85,7 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.Fonts.loadFont(kDefaultFont);
 
         infinitEngine.ResourceMap.setLoadCompleteCallback(
-            function() {_createShaders(callBackFunction);});
+            function s() {_createShaders(callBackFunction);});
     };
 
      // unload all resources

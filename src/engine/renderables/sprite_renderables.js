@@ -36,10 +36,8 @@ SpriteRenderable.prototype.setElementUVCoordinate = function (left, right, botto
 
 // specify element region by pixel positions (between 0 to image resolutions)
 SpriteRenderable.prototype.setElementPixelPositions = function (left, right, bottom, top) {
-    var texInfo = infinitEngine.ResourceMap.retrieveAsset(this.ivTexture);
-    // entire image width, height
-    var imageW = texInfo.ivWidth;
-    var imageH = texInfo.ivHeight;
+    var imageW = this.ivTextureInfo.ivWidth;
+    var imageH = this.ivTextureInfo.ivHeight;
 
     this.ivTexLeft = left / imageW;
     this.ivTexRight = right / imageW;
