@@ -26,7 +26,7 @@ Demo.prototype._initializeLights = function () {
 
     l = this._createALight(
         [24, 24, 8],           // Left minion position
-        [0.4, 0.7, 0.4, 1],    // color
+        [0.4, 1.0, 0.4, 1],    // color
         20, 45,                // near and far
         2.8                    // intensity
     );
@@ -42,7 +42,7 @@ Demo.prototype._initializeLights = function () {
 
     l = this._createALight(
         [72, 57, 6],            // Center of camera 
-        [0.8, 0.6, 0.6, 1],     // color
+        [0.6, 0.8, 0.8, 1],     // color
         15, 40,                 // near and far
         3                       // intensity
     );
