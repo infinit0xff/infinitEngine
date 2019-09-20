@@ -5,6 +5,7 @@ function PerRenderCache() {
     this.ivWCToPixelRatio = 1;  // WC to pixel transformation
     this.ivCameraOrgX = 1; // Lower-left corner of camera in WC 
     this.ivCameraOrgY = 1;
+    this.ivCameraPosInPixelSpace = vec3.fromValues(0, 0, 0);
 }
 
 function Camera(wcCenter, wcWidth, viewportArray, bound) {
@@ -19,6 +20,9 @@ function Camera(wcCenter, wcWidth, viewportArray, bound) {
     this.setViewport(viewportArray, this.ivViewportBound);
     this.ivNearPlane = 0;
     this.ivFarPlane = 1000;
+    
+    // this is for illumination computation
+    this.kCameraZ = 10;
 
     // transform matrices
     this.ivViewMatrix = mat4.create();
@@ -51,6 +55,7 @@ Camera.prototype.setWCCenter = function(xPos, yPos) {
 
 };
 
+Camera.prototype.getPosInPixelSpace = function () { return this.ivRenderCache.ivCameraPosInPixelSpace; };
 Camera.prototype.getWCCenter = function () { return this.ivCameraState.getCenter(); };
 Camera.prototype.setWCWidth = function (width) { this.ivCameraState.setWidth(width); };
 Camera.prototype.getWCWidth = function () { return this.ivCameraState.getWidth(); };
@@ -142,10 +147,15 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
     // concatnate view and project matrices
     mat4.multiply(this.ivVPMatrix, this.ivProjMatrix, this.ivViewMatrix);
     
-    // Step B4: compute and cache per-rendering information
+    // compute and cache per-rendering information
     this.ivRenderCache.ivWCToPixelRatio = this.ivViewport[Camera.eViewport.eWidth] / this.getWCWidth();
     this.ivRenderCache.ivCameraOrgX = center[0] - (this.getWCWidth() / 2);
     this.ivRenderCache.ivCameraOrgY = center[1] - (this.getWCHeight() / 2);
+    
+    var p = this.wcPosToPixel(this.getWCCenter());
+    this.ivRenderCache.ivCameraPosInPixelSpace[0] = p[0];
+    this.ivRenderCache.ivCameraPosInPixelSpace[1] = p[1];
+    this.ivRenderCache.ivCameraPosInPixelSpace[2] = this.fakeZInPixelSpace(this.kCameraZ);
 
 };
 
