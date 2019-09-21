@@ -1,10 +1,10 @@
 // this is the fragment (or pixel) shader
 
-// sets the precision for floating point computation
 precision mediump float; 
+    // sets the precision for floating point computation
 
-// the object that fetches data from texture.
-// must be set outside the shader.
+// The object that fetches data from texture.
+// Must be set outside the shader.
 uniform sampler2D uSampler;
 
 // color of pixel
@@ -12,42 +12,63 @@ uniform vec4 uPixelColor;
 uniform vec4 uGlobalAmbientColor; // this is shared globally
 uniform float uGlobalAmbientIntensity;
 
-// light information
 #define kGLSLuLightArraySize 4
     // GLSL Fragment shader requires loop control
     // variable to be a constant number. This number 4
     // says, this fragment shader will _ALWAYS_ process
     // all 4 light sources. 
     // ***********WARNING***********************
-    // this number must correspond to the constant with
-    // the same name defined in light_shader.js file.
+    // This number must correspond to the constant with
+    // the same name defined in LightShader.js file.
     // ***********WARNING**************************
-    // to change this number MAKE SURE: to update the 
+    // To change this number MAKE SURE: to update the 
     //     kGLSLuLightArraySize
-    // defined in light_shader.js file.
+    // defined in LightShader.js file.
+
+#define ePointLight       0
+#define eDirectionalLight 1
+#define eSpotLight        2
+    // ******** WARNING ******
+    // the above enumerated values must be identical to 
+    // Light.eLightType values defined in light.js
+    // ******** WARNING ******
 
 struct Light  {
-    vec3 Position;   // in pixel space!
+    vec3 Position;      // in pixel space!
+    vec3 Direction;     // Light direction
     vec4 Color;
-    float Near;     // distance in pixel space
-    float Far;     // distance in pixel space
+    float Near;         // distance in pixel space
+    float Far;
+    float CosInner;     // cosine of inner cone angle for spotlight
+    float CosOuter;     // cosine of outer cone angle for spotlight
     float Intensity;
+    float DropOff;      // for spotlight only
     bool  IsOn;
+    int   LightType;    // one of ePointLight, eDirectionalLight, eSpotLight
 };
-
-// maximum array of lights this shader supports
-uniform Light uLights[kGLSLuLightArraySize];
+uniform Light uLights[kGLSLuLightArraySize];  // Maximum array of lights this shader supports
 
 // the "varying" keyword is for signifing that the texture coordinate will be
 // interpolated and thus varies. 
 varying vec2 vTexCoord;
 
-
-vec4 LightEffect(Light lgt)
-{
-    vec4 result = vec4(0);
+float AngularDropOff(Light lgt, vec3 lgtDir, vec3 L) {
     float atten = 0.0;
-    float dist = length(lgt.Position.xyz - gl_FragCoord.xyz);
+    float cosL = dot(lgtDir, L);
+    float num = cosL - lgt.CosOuter;
+    if (num > 0.0) {
+        if (cosL > lgt.CosInner) 
+            atten = 1.0;
+        else {
+            float denom = lgt.CosInner - lgt.CosOuter;
+            atten = smoothstep(0.0, 1.0, pow(num/denom, lgt.DropOff));
+        }
+    }
+    return atten;
+}
+
+float DistanceDropOff(Light lgt, float dist) {
+    float atten = 0.0;
     if (dist <= lgt.Far) {
         if (dist <= lgt.Near)
             atten = 1.0;  //  no attenuation
@@ -58,8 +79,28 @@ vec4 LightEffect(Light lgt)
             atten = smoothstep(0.0, 1.0, 1.0-(n*n)/(d*d)); // blended attenuation
         }   
     }
-    result = atten * lgt.Intensity * lgt.Color;
-    return result;
+    return atten;
+}
+
+// directional lights: without normal information
+//    directional light is the same as an ambient light!
+vec4 LightEffect(Light lgt) {    
+    float aAtten = 1.0, dAtten = 1.0;
+
+    if (lgt.LightType != eDirectionalLight) {
+        vec3 lgtDir = -normalize(lgt.Direction.xyz);
+        vec3 L = lgt.Position.xyz - gl_FragCoord.xyz;
+        float dist = length(L); // distant to light
+        L = L / dist;  // same as calling normalize(), only faster
+    
+        // find out what kind of light ...
+        if (lgt.LightType == eSpotLight) {
+            // spotlight: do angle dropoff
+            aAtten = AngularDropOff(lgt, lgtDir, L);
+        } 
+        dAtten = DistanceDropOff(lgt, dist);
+    }
+    return dAtten * aAtten * lgt.Intensity * lgt.Color;
 }
 
 void main(void)  {
