@@ -1,11 +1,14 @@
 "use strict";
 
-function Hero(spriteTexture, normalMap) {
+function Hero(spriteTexture, normalMap, atX, atY) {
     this.kDelta = 0.3;
-
-    this.ivDye = new IllumRenderable(spriteTexture, normalMap);
+    if (normalMap !== null) {
+        this.ivDye = new IllumRenderable(spriteTexture, normalMap);
+    } else {
+        this.ivDye = new LightRenderable(spriteTexture);
+    }
     this.ivDye.setColor([1, 1, 1, 0]);
-    this.ivDye.getXform().setPosition(15, 50);
+    this.ivDye.getXform().setPosition(atX, atY);
     this.ivDye.getXform().setSize(18, 24);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
