@@ -1,6 +1,7 @@
 "use strict";
 
 Demo.prototype._lightControl = function () {
+    var dirDelta = 0.005;
     var delta = 0.2;
     var msg = "";
     // player select which light to work 
@@ -9,37 +10,68 @@ Demo.prototype._lightControl = function () {
     // manipulate the light
     var lgt = this.ivGlobalLightSet.getLightAt(this.ivLgtIndex);
     var p = lgt.getPosition();
+    var d = lgt.getDirection();
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Left)) {
-        lgt.setXPos(p[0] - delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[0] -= dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setXPos(p[0] - delta);
+        }
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Right)) {
-        lgt.setXPos(p[0] + delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[0] += dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setXPos(p[0] + delta);
+        }
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Up)) {
-        lgt.setYPos(p[1] + delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[1] += dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setYPos(p[1] + delta);
+        }
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Down)) {
-        lgt.setYPos(p[1] - delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[1] -= dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setYPos(p[1] - delta);
+        }
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Z)) {
-        lgt.setZPos(p[2] + delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[2] += dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setZPos(p[2] + delta);
+        }
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.X)) {
-        lgt.setZPos(p[2] - delta);
+        if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+            d[2] -= dirDelta;
+            lgt.setDirection(d);
+        } else {
+            lgt.setZPos(p[2] - delta);
+        }
     }
 
     // radius
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.C)) {
-        lgt.setNear(lgt.getNear() + delta);
+        lgt.setInner(lgt.getInner() + (delta * 0.01)); // convert to radian
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.V)) {
-        lgt.setNear(lgt.getNear() - delta);
+        lgt.setInner(lgt.getInner() - (delta * 0.01)); // convert to radian
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.B)) {
-        lgt.setFar(lgt.getFar() + delta);
+        lgt.setOuter(lgt.getOuter() + (delta * 0.01)); // convert to radian
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.N)) {
-        lgt.setFar(lgt.getFar() - delta);
+        lgt.setOuter(lgt.getOuter() - (delta * 0.01)); // convert to radian
     }
 
     // Intensity
@@ -54,10 +86,17 @@ Demo.prototype._lightControl = function () {
     if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
         lgt.setLightTo(!lgt.isLightOn());
     }
-    msg = "On(" + lgt.isLightOn() + ") " +
-          this._printVec3("P", p) +
-          "R(" + lgt.getNear().toPrecision(3) + "/" + lgt.getFar().toPrecision(3) + ") " +
+
+    var lMsg = "";
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Space)) {
+        lMsg = this._printVec3("D", d);
+    } else {
+        lMsg = this._printVec3("P", p);
+    }
+    msg = "On(" + lgt.isLightOn() + ") " + lMsg +
+          "R(" + lgt.getInner().toPrecision(3) + "/" + lgt.getOuter().toPrecision(3) + ") " +
           "I(" + lgt.getIntensity().toPrecision(3) + ")";
+
     return msg;
 };
 
