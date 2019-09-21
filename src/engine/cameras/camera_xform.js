@@ -13,6 +13,14 @@ Camera.prototype.wcPosToPixel = function (p) {
     return vec3.fromValues(x, y, z);
 };
 
+Camera.prototype.wcDirToPixel = function (d) {  // d is a vec3 direction in WC
+    // convert the position to pixel space
+    var x = d[0] * this.ivRenderCache.ivWCToPixelRatio;
+    var y = d[1] * this.ivRenderCache.ivWCToPixelRatio;
+    var z = d[2];
+    return vec3.fromValues(x, y, z);
+};
+
 Camera.prototype.wcSizeToPixel = function (s) {
     return (s * this.ivRenderCache.ivWCToPixelRatio) + 0.5;
 };
