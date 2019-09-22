@@ -12,7 +12,6 @@ infinitEngine.DefaultResources = (function() {
     var getGlobalAmbientColor = function () { return ivGlobalAmbientColor; };
     var setGlobalAmbientColor = function (v) { ivGlobalAmbientColor = vec4.fromValues(v[0], v[1], v[2], v[3]); };
 
-
     // simple shader glsl shader file paths
      
     // path to the VertexShader
@@ -27,6 +26,10 @@ infinitEngine.DefaultResources = (function() {
     var kTextureFS = "src/glsl_shaders/texture_fs.glsl";  // Path to the texture FragmentShader
     var ivTextureShader = null;
     var ivSpriteShader = null;
+
+    // line shader
+    var kLineFS = "src/glsl_shaders/line_fs.glsl";        // Path to the Line FragmentShader
+    var ivLineShader = null;
 
     // light Shader
     var kLightFS = "src/glsl_shaders/light_fs.glsl";  // Path to the Light FragmentShader
@@ -50,6 +53,7 @@ infinitEngine.DefaultResources = (function() {
     var getConstColorShader = function() { return ivConstColorShader; };
     var getTextureShader = function () { return ivTextureShader; };
     var getSpriteShader = function () { return ivSpriteShader; };
+    var getLineShader = function () { return ivLineShader; };
     var getLightShader = function () { return ivLightShader; };
     var getIllumShader = function () { return ivIllumShader; };
     var getShadowReceiverShader = function () { return ivShadowReceiverShader; };
@@ -61,6 +65,7 @@ infinitEngine.DefaultResources = (function() {
         ivConstColorShader = new SimpleShader(kSimpleVS, kSimpleFS);
         ivTextureShader = new TextureShader(kTextureVS, kTextureFS);
         ivSpriteShader =  new SpriteShader(kTextureVS, kTextureFS);
+        ivLineShader =  new LineShader(kSimpleVS, kLineFS);
         ivLightShader = new LightShader(kTextureVS, kLightFS);
         ivIllumShader = new IllumShader(kTextureVS, kIllumFS);
         ivShadowReceiverShader = new SpriteShader(kTextureVS, kShadowReceiverFS);
@@ -81,6 +86,9 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.loadTextFile(kTextureVS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
         infinitEngine.TextFileLoader.loadTextFile(kTextureFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
  
+        // Line Shader:
+        infinitEngine.TextFileLoader.loadTextFile(kLineFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+
         // Light Shader
         infinitEngine.TextFileLoader.loadTextFile(kLightFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
 
@@ -103,11 +111,11 @@ infinitEngine.DefaultResources = (function() {
         ivConstColorShader.cleanUp();
         ivTextureShader.cleanUp();
         ivSpriteShader.cleanUp();
+        ivLineShader.cleanUp();
         ivLightShader.cleanUp();
         ivIllumShader.cleanUp();
         ivShadowReceiverShader.cleanUp();
         ivShadowCasterShader.cleanUp();
-
 
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleVS);
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleFS);
@@ -116,6 +124,9 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.unloadTextFile(kTextureVS);
         infinitEngine.TextFileLoader.unloadTextFile(kTextureFS);
 
+        // Line Shader:
+        infinitEngine.TextFileLoader.unloadTextFile(kLineFS);
+        
         // Light Shader
         infinitEngine.TextFileLoader.unloadTextFile(kLightFS);
 
@@ -130,12 +141,12 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.Fonts.unloadFont(kDefaultFont);
     };
 
-
     var ivPublic = {
         initialize: initialize,
         getConstColorShader: getConstColorShader,
         getTextureShader: getTextureShader,
         getSpriteShader: getSpriteShader,
+        getLineShader: getLineShader,
         getLightShader: getLightShader,
         getIllumShader: getIllumShader,
         getShadowReceiverShader: getShadowReceiverShader,
@@ -149,4 +160,5 @@ infinitEngine.DefaultResources = (function() {
     };
 
     return ivPublic;
+
 }());
