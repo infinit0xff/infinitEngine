@@ -23,4 +23,10 @@ Renderable.prototype.draw = function(aCamera) {
 Renderable.prototype.getXform = function() { return this.ivXform; }
 Renderable.prototype.setColor = function(color) { this.ivColor = color; };
 Renderable.prototype.getColor = function() { return this.ivColor; };
+Renderable.prototype.swapShader = function (s) {
+    var out = this.ivShader;
+    this.ivShader = s;
+    return out;
+};
+
 Renderable.prototype._setShader = function (s) { this.ivShader = s; };
