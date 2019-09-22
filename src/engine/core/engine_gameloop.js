@@ -2,8 +2,9 @@ var infinitEngine = infinitEngine || {};
 
 infinitEngine.GameLoop = (function() {
 
-    var KFPS = 60;          // frames per second
-    var KMPF = 1000 / KFPS; // milleseconds per frame
+    var kFPS = 60;          // frames per second
+    var kFrameTime = 1 / kFPS;
+    var kMPF = 1000 * kFrameTime; // milleseconds per frame
 
     // variables for timing gameloop
     var ivPreviousTime;
@@ -33,10 +34,10 @@ infinitEngine.GameLoop = (function() {
             // update only every millesecond per frame
             // if lag larget then update frames, update
             // until caught up
-            while ((ivLagTime >= KMPF) && ivLoopIsRunning) {
+            while ((ivLagTime >= kMPF) && ivLoopIsRunning) {
                 infinitEngine.Input.update();
                 this.update(); // call Demo update
-                ivLagTime -= KMPF;
+                ivLagTime -= kMPF;
             }
 
             // draw
@@ -74,9 +75,16 @@ infinitEngine.GameLoop = (function() {
         ivLoopIsRunning = false;
     };
 
+    var getUpdateIntervalInSeconds = function () {
+        return kFrameTime;
+    };
+
     var ivPublic = {
         start: start,
-        stop: stop
+        stop: stop,
+        getUpdateIntervalInSeconds: getUpdateIntervalInSeconds
+
+
     };
     return ivPublic;
 })();
