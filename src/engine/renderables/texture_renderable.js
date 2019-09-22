@@ -1,4 +1,4 @@
-"use strict";  // Operate in Strict mode such that variables must be declared before used!
+"use strict"; 
 
 function TextureRenderable(myTexture) {
     Renderable.call(this);
@@ -6,7 +6,7 @@ function TextureRenderable(myTexture) {
     Renderable.prototype._setShader.call(this, infinitEngine.DefaultResources.getTextureShader());
     
     // texture for this object, cannot be a "null"
-    this.ivTexture = myTexture;
+    this.ivTexture = null;
     
     // these two instance variables are to cache texture information
     // for supporting per-pixel accurate collision
