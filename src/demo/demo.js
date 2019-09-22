@@ -6,14 +6,14 @@ function Demo() {
     this.kBg = "assets/bg.png";
     this.kBgNormal = "assets/bg_normal.png";
 
-    // camera to view the scene
+    // the camera to view the scene
     this.ivCamera = null;
     this.ivBg = null;
 
     this.ivMsg = null;
     this.ivMatMsg = null;
 
-    // hero and the support objects
+    // the hero and the support objects
     this.ivLgtHero = null;
     this.ivIllumHero = null;
 
@@ -27,6 +27,10 @@ function Demo() {
 
     this.ivLgtIndex = 0;
     this.ivLgtRotateTheta = 0;
+    
+    // shadow support
+    this.ivBgShadow = null;
+    this.ivMinionShadow = null;
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
@@ -38,6 +42,8 @@ Demo.prototype.loadScene = function () {
 };
 
 Demo.prototype.unloadScene = function () {
+    infinitEngine.LayerManager.cleanUp();
+    
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
     infinitEngine.Textures.unloadTexture(this.kBg);
     infinitEngine.Textures.unloadTexture(this.kBgNormal);
@@ -51,30 +57,31 @@ Demo.prototype.initialize = function () {
         100,                       // width of camera
         [0, 0, 640, 480]           // viewport (orgX, orgY, width, height)
     );
+
     // sets the background to gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
 
     // the light
-    this._initializeLights();   // defined in demo_lights.js
+    this._initializeLights();   // defined in MyGame_Lights.js
 
-    // the Background
+    // the background
     var bgR = new IllumRenderable(this.kBg, this.kBgNormal);
     bgR.setElementPixelPositions(0, 1024, 0, 1024);
     bgR.getXform().setSize(100, 100);
     bgR.getXform().setPosition(50, 35);
     bgR.getMaterial().setSpecular([1, 0, 0, 1]);
-    var i;
+    var i; 
     for (i = 0; i < 4; i++) {
         bgR.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
     }
     this.ivBg = new GameObject(bgR);
 
-    // 
     // the objects
-    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 15, 50);
-    this.ivLgtHero = new Hero(this.kMinionSprite, null, 80, 50);
-    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 17, 15);
-    this.ivLgtMinion = new Minion(this.kMinionSprite, null, 87, 15);
+    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 20, 30);
+    this.ivLgtHero = new Hero(this.kMinionSprite, null, 60, 50);
+    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 25, 30);
+    this.ivIllumMinion.getXform().incSizeBy(20);
+    this.ivLgtMinion = new Minion(this.kMinionSprite, null, 65, 25);
     for (i = 0; i < 4; i++) {
         this.ivIllumHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
         this.ivLgtHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
@@ -105,20 +112,26 @@ Demo.prototype.initialize = function () {
     this.ivSelectedCh = this.ivIllumHero;
     this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
     this.ivSelectedChMsg = "H:";
+    
+    this._setupShadow();  // defined in MyGame_Shadow.js
 };
 
 
 Demo.prototype.drawCamera = function (camera) {
     // set up the View Projection matrix
     camera.setupViewProjection();
-    // sow draws each primitive
-    this.ivBg.draw(camera);
+    
+    
+    // always draw shadow receivers first!
+    this.ivBgShadow.draw(camera);        // also draws the receiver object
+    this.ivMinionShadow.draw(camera);
+    this.ivLgtMinionShadow.draw(camera);
+    
     this.ivBlock1.draw(camera);
-    this.ivLgtMinion.draw(camera);
     this.ivIllumHero.draw(camera);
-    this.ivBlock2.draw(camera);
+    this.ivBlock2.draw(camera);  
     this.ivLgtHero.draw(camera);
-    this.ivIllumMinion.draw(camera);
+    
 };
 
 // this is the draw function, make sure to setup proper drawing environment, and more
@@ -133,7 +146,7 @@ Demo.prototype.draw = function () {
     this.ivMatMsg.draw(this.ivCamera);
 };
 
-// the update function, updates the application state. Make sure to _NOT_ draw
+// the update function, updates the application state. make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
     this.ivCamera.update();  // to ensure proper interpolated movement effects
@@ -142,6 +155,7 @@ Demo.prototype.update = function () {
     this.ivLgtMinion.update();
 
     this.ivIllumHero.update();  // allow keyboard control to move
+    this.ivLgtHero.update();
 
     // control the selected light
     var msg = "L=" + this.ivLgtIndex + " ";
