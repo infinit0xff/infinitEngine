@@ -53,7 +53,7 @@ RigidShape.prototype.collidedRectCirc = function(rect1Shape, circ2Shape, collisi
     var depth;        
         
     vec2.scale(normal, normal, 1/len); // normalize normal
-    if (isInside) { //flip normal if inside the rect
+    if (isInside) { // flip normal if inside the rect
         vec2.scale(normal, normal, -1);
         depth = circ2Shape.getRadius() + len;
     } else {
@@ -63,4 +63,17 @@ RigidShape.prototype.collidedRectCirc = function(rect1Shape, circ2Shape, collisi
     collisionInfo.setNormal(normal);
     collisionInfo.setDepth(depth);
     return true;
+};
+
+RigidShape.prototype.resolveParticleCollision = function(aParticle) {
+    var status = false;
+    switch (this.rigidType()) {
+        case RigidShape.eRigidType.eRigidCircle:
+            status = infinitEngine.Particle.resolveCirclePos(this, aParticle);
+            break;
+        case RigidShape.eRigidType.eRigidRectangle:
+            status = infinitEngine.Particle.resolveRectPos(this, aParticle);
+            break;
+    }
+    return status;
 };
