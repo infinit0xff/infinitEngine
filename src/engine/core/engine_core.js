@@ -12,8 +12,8 @@ infinitEngine.Core = (function() {
     
     // create canvas and expose as HTMLCanvasElement
     var canvas = document.createElement("canvas");
-    canvas.width = 640;
-    canvas.height = 480;
+    canvas.width = 1280;
+    canvas.height = 720;
     canvas.innerHTML = "your browser does not support HTML5 canvas."
  
     // add canvas to body
