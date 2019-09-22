@@ -10,6 +10,7 @@ function Hero(spriteTexture, normalMap, atX, atY) {
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(atX, atY);
     this.ivDye.getXform().setSize(18, 24);
+    this.ivDye.getXform().setZPos(5);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
 }
