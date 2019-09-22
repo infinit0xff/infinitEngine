@@ -18,6 +18,7 @@ function Light() {
     this.ivDropOff = 1;  // 
     this.ivLightType = Light.eLightType.ePointLight;
     this.ivIsOn = true;
+    this.ivCastShadow = false;
 }
 
 // simple setters and getters
@@ -56,3 +57,6 @@ Light.prototype.getLightType = function () { return this.ivLightType; };
 
 Light.prototype.isLightOn = function () { return this.ivIsOn; };
 Light.prototype.setLightTo = function (isOn) { this.ivIsOn = isOn; };
+
+Light.prototype.isLightCastShadow = function () { return this.ivCastShadow; };
+Light.prototype.setLightCastShadowTo = function (on) { this.ivCastShadow = on; };
