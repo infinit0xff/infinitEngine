@@ -5,24 +5,36 @@ function Transform() {
     this.ivPosition = vec2.fromValues(0, 0);
     // width (x) and height (y)
     this.ivScale = vec2.fromValues(1, 1);
+    // must be a positive number, larger is cloer to eye
+    this.ivZ = 0.0;
+
      // radian
     this.ivRotationInRad = 0.0;
 }
 
-//**
-//  Public Methods
-//** 
+
+Transform.prototype.cloneTo = function (aXform) {
+    aXform.ivPosition = vec2.clone(this.ivPosition);
+    aXform.ivScale = vec2.clone(this.ivScale);
+    aXform.ivZ = this.ivZ;
+    aXform.ivRotationInRad = this.ivRotationInRad;
+};
 
 // setters and getters
 Transform.prototype.setPosition = function (xPos, yPos) { this.setXPos(xPos); this.setYPos(yPos); };
 Transform.prototype.getPosition = function () { return this.ivPosition; };
+Transform.prototype.get3DPosition = function () {
+    return vec3.fromValues(this.getXPos(), this.getYPos(), this.getZPos());
+};
 Transform.prototype.setXPos = function (xPos) { this.ivPosition[0] = xPos; };
 Transform.prototype.getXPos = function () { return this.ivPosition[0]; };
 Transform.prototype.setYPos = function (yPos) { this.ivPosition[1] = yPos; };
 Transform.prototype.getYPos = function () { return this.ivPosition[1]; };
 Transform.prototype.incXPosBy = function (delta) { this.ivPosition[0] += delta; };
 Transform.prototype.incYPosBy = function (delta) { this.ivPosition[1] += delta; };
-
+Transform.prototype.setZPos = function (d) { this.ivZ = d; };
+Transform.prototype.getZPos = function () { return this.ivZ; };
+Transform.prototype.incZPosBy = function (delta) { this.ivZ += delta; };
 // setter and getter for size
 Transform.prototype.setSize = function (width, height) {
     this.setWidth(width);
@@ -65,11 +77,11 @@ Transform.prototype.getXform = function () {
     // creates an empty identity matrix
     var matrix = mat4.create();
 
-    // Remember - WebGL uses matrices that are transposed, so typical matrix
+    // remember - WebGL uses matrices that are transposed, so typical matrix
     // operations must be in reverse.
 
     // compute translation, z is always at 0.0 for now
-    mat4.translate(matrix, matrix, vec3.fromValues(this.getXPos(), this.getYPos(), 0.0));
+    mat4.translate(matrix, matrix, this.get3DPosition());
     // concatenate with rotation.
     mat4.rotateZ(matrix, matrix, this.getRotationInRad());
     // concatenate with scaling
