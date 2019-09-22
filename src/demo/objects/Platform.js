@@ -9,8 +9,10 @@ function Platform(texture, atX, atY) {
                                 // show each element for mAnimSpeed updates
     GameObject.call(this, this.ivPlatform);
 
-    var rigidShape = new RigidRectangle(this.getXform(), 25, 5);
+    var rigidShape = new RigidRectangle(this.getXform(), 30, 3);
+    rigidShape.setMass(0);  // ensures no movements!
     rigidShape.setDrawBounds(true);
+    rigidShape.setColor([1, 0.2, 0.2, 1]);
     this.setPhysicsComponent(rigidShape);
 }
 infinitEngine.Core.inheritPrototype(Platform, GameObject);

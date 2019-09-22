@@ -1,35 +1,52 @@
 "use strict";
 
 function Hero(spriteTexture, atX, atY) {
-    this.kDelta = 0.3;
+    this.kXDelta = 1;
+    this.kYDelta = 2.0;
     this.ivDye = new SpriteRenderable(spriteTexture);
-
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(atX, atY);
     this.ivDye.getXform().setSize(18, 24);
-    // this.ivDye.getXform().setZPos(5);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
-    var r = new RigidCircle(this.getXform(), 9);
+    var r = new RigidRectangle(this.getXform(), 16, 22);
+    r.setMass(0.7);  // less dense than Minions
+    r.setRestitution(0.3);
     r.setColor([0, 1, 0, 1]);
     r.setDrawBounds(true);
     this.setPhysicsComponent(r);
 }
 infinitEngine.Core.inheritPrototype(Hero, GameObject);
 
-Hero.prototype.update = function () {
+Hero.prototype.update = function (dyePacks) {
+    // must call super class update
+    GameObject.prototype.update.call(this);
+
     // control by WASD
-    var xform = this.getXform();
+    var v = this.getPhysicsComponent().getVelocity();
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.W)) {
-        xform.incYPosBy(this.kDelta);
+        v[1] += this.kYDelta;
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.S)) {
-        xform.incYPosBy(-this.kDelta);
+        v[1] -= this.kYDelta;
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.A)) {
-        xform.incXPosBy(-this.kDelta);
+        v[0] -= this.kXDelta;
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.D)) {
-        xform.incXPosBy(this.kDelta);
+        v[0] += this.kXDelta;
+    }
+    
+    // now interact with the dyePack ...
+    var i, obj;
+    var heroBounds = this.getBBox();
+    var p = this.getXform().getPosition();
+    for (i=0; i<dyePacks.size(); i++) {
+        obj = dyePacks.getObjectAt(i);
+        // chase after hero
+        obj.rotateObjPointTo(p, 0.8);
+        if (obj.getBBox().intersectsBound(heroBounds)) {
+            dyePacks.removeFromSet(obj);
+        }
     }
 };
