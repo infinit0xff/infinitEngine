@@ -26,12 +26,6 @@ function SpriteShader(vertexShaderPath, fragmentShaderPath) {
 // spriteShader subclass's TextureShader
 infinitEngine.Core.inheritPrototype(SpriteShader, TextureShader);
 
-SpriteShader.prototype.setTextureCoordinate = function(texCoord) {
-    var gl = infinitEngine.Core.getGL();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.ivTexCoordBuffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(texCoord))
-};
-
 SpriteShader.prototype.activateShader = function(pixelColor, aCamera) {
     // call superclass
     SimpleShader.prototype.activateShader.call(this, pixelColor, aCamera);
@@ -48,6 +42,12 @@ SpriteShader.prototype.activateShader = function(pixelColor, aCamera) {
     gl.enableVertexAttribArray(this.ivShaderTextureCoordAttribute);
 };
 
+SpriteShader.prototype.setTextureCoordinate = function(texCoord) {
+    var gl = infinitEngine.Core.getGL();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.ivTexCoordBuffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(texCoord))
+};
+
 // cleanup to release allocated memory
 SpriteShader.prototype.cleanUp = function () {
     var gl = infinitEngine.Core.getGL();
@@ -55,3 +55,13 @@ SpriteShader.prototype.cleanUp = function () {
     // now call super class's clean up ...
     SimpleShader.prototype.cleanUp.call(this);
 };
+
+// make sure these functions are defined, such that
+// this shader can support LightRenderable and IllumRenderable
+
+// will be override by LightShader
+SpriteShader.prototype.setLights = function (l) { };
+
+// will be override by IllumShader
+SpriteShader.prototype.setMaterialAndCameraPos = function(m, p) { };
+
