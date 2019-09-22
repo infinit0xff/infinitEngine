@@ -2,183 +2,156 @@
 
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
-    this.kMinionSpriteNormal = "assets/minion_sprite_normal.png";
-    this.kBg = "assets/bg.png";
-    this.kBgNormal = "assets/bg_normal.png";
+    this.kPlatformTexture = "assets/platform.png";
+    
+    this.kCollideColor = [1, 0, 0, 1];
+    this.kNormalColor = [0, 1, 0, 1];
 
-    // the camera to view the scene
+    // The camera to view the scene
     this.ivCamera = null;
-    this.ivBg = null;
 
     this.ivMsg = null;
-    this.ivMatMsg = null;
 
     // the hero and the support objects
-    this.ivLgtHero = null;
-    this.ivIllumHero = null;
-
-    this.ivLgtMinion = null;
-    this.ivIllumMinion = null;
-
-    this.ivGlobalLightSet = null;
-
-    this.ivBlock1 = null;   // to verify swiitching between shaders is fine
-    this.ivBlock2 = null;
-
-    this.ivLgtIndex = 0;
-    this.ivLgtRotateTheta = 0;
+    this.ivHero = null;
+    this.ivMinion = null;
+    this.ivPlatform = null;
     
-    // shadow support
-    this.ivBgShadow = null;
-    this.ivMinionShadow = null;
+    this.ivSelectedObj = null;
+    this.ivCollidedObj = null;
+    this.ivAllObjects = new GameObjectSet();
+    
+    this.kPrompt = "[H:hero M:minion P:platform]: ";
+    this.ivEcho = "Hero";
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
-    infinitEngine.Textures.loadTexture(this.kBg);
-    infinitEngine.Textures.loadTexture(this.kBgNormal);
-    infinitEngine.Textures.loadTexture(this.kMinionSpriteNormal);
+    infinitEngine.Textures.loadTexture(this.kPlatformTexture);
 };
 
-Demo.prototype.unloadScene = function () {
-    infinitEngine.LayerManager.cleanUp();
-    
+Demo.prototype.unloadScene = function () {    
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
-    infinitEngine.Textures.unloadTexture(this.kBg);
-    infinitEngine.Textures.unloadTexture(this.kBgNormal);
-    infinitEngine.Textures.unloadTexture(this.kMinionSpriteNormal);
+    infinitEngine.Textures.unloadTexture(this.kPlatformTexture);
 };
 
 Demo.prototype.initialize = function () {
-    // set up the cameras
+    // Step A: set up the cameras
     this.ivCamera = new Camera(
-        vec2.fromValues(50, 37.5), // position of the camera
-        100,                       // width of camera
-        [0, 0, 640, 480]           // viewport (orgX, orgY, width, height)
+        vec2.fromValues(100, 56.25), // position of the camera
+        200,                         // width of camera
+        [0, 0, 1280, 720]            // viewport (orgX, orgY, width, height)
     );
-
-    // sets the background to gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
-
-    // the light
-    this._initializeLights();   // defined in MyGame_Lights.js
-
-    // the background
-    var bgR = new IllumRenderable(this.kBg, this.kBgNormal);
-    bgR.setElementPixelPositions(0, 1024, 0, 1024);
-    bgR.getXform().setSize(100, 100);
-    bgR.getXform().setPosition(50, 35);
-    bgR.getMaterial().setSpecular([1, 0, 0, 1]);
-    var i; 
-    for (i = 0; i < 4; i++) {
-        bgR.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
+            // sets the background to gray
+    
+    infinitEngine.DefaultResources.setGlobalAmbientIntensity(3);
+    
+    // create a few objects ...
+    var i, rx, ry, obj; 
+    ry = Math.random() * 5 + 20;
+    for (i = 0; i<4; i++) {
+        rx = 20 + Math.random() * 80;
+        obj = new Hero(this.kMinionSprite, rx, ry);
+        this.ivAllObjects.addToSet(obj);
+        
+        rx = rx + 20 + Math.random() * 80;
+        obj = new Minion(this.kMinionSprite, rx, ry);
+        this.ivAllObjects.addToSet(obj);
+        
+        rx = 20 + Math.random() * 160;
+        obj = new Platform(this.kPlatformTexture, rx, ry);
+        this.ivAllObjects.addToSet(obj);
+        
+        ry = ry + 20 + Math.random() * 10;
     }
-    this.ivBg = new GameObject(bgR);
-
-    // the objects
-    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 20, 30);
-    this.ivLgtHero = new Hero(this.kMinionSprite, null, 60, 50);
-    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 25, 30);
-    this.ivIllumMinion.getXform().incSizeBy(20);
-    this.ivLgtMinion = new Minion(this.kMinionSprite, null, 65, 25);
-    for (i = 0; i < 4; i++) {
-        this.ivIllumHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
-        this.ivLgtHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
-        this.ivIllumMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
-        this.ivLgtMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
-    }
-
-    this.ivMsg = new FontRenderable("Status Message");
-    this.ivMsg.setColor([1, 1, 1, 1]);
+    
+    // 
+    // the important objects
+    this.ivHero = new Hero(this.kMinionSprite, 20, 30);
+    this.ivAllObjects.addToSet(this.ivHero);
+    
+    this.ivMinion = new Minion(this.kMinionSprite, 50, 50);
+    this.ivAllObjects.addToSet(this.ivMinion);
+    
+    this.ivPlatform = new Platform(this.kPlatformTexture, 20, 30);
+    this.ivAllObjects.addToSet(this.ivPlatform);
+    
+    
+    this.ivSelectedObj = this.ivHero;
+    this.ivSelectedObj.setVisibility(false);
+    
+    this.ivMsg = new FontRenderable(this.kPrompt);
+    this.ivMsg.setColor([0, 0, 0, 1]);
     this.ivMsg.getXform().setPosition(1, 2);
     this.ivMsg.setTextHeight(3);
-
-    this.ivMatMsg = new FontRenderable("Status Message");
-    this.ivMatMsg.setColor([1, 1, 1, 1]);
-    this.ivMatMsg.getXform().setPosition(1, 73);
-    this.ivMatMsg.setTextHeight(3);
-
-    this.ivBlock1 = new Renderable();
-    this.ivBlock1.setColor([1, 0, 0, 1]);
-    this.ivBlock1.getXform().setSize(5, 5);
-    this.ivBlock1.getXform().setPosition(30, 50);
-
-    this.ivBlock2 = new Renderable();
-    this.ivBlock2.setColor([0, 1, 0, 1]);
-    this.ivBlock2.getXform().setSize(5, 5);
-    this.ivBlock2.getXform().setPosition(70, 50);
-
-    this.ivSelectedCh = this.ivIllumHero;
-    this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
-    this.ivSelectedChMsg = "H:";
-    
-    this._setupShadow();  // defined in MyGame_Shadow.js
 };
 
-
-Demo.prototype.drawCamera = function (camera) {
-    // set up the View Projection matrix
-    camera.setupViewProjection();
-    
-    
-    // always draw shadow receivers first!
-    this.ivBgShadow.draw(camera);        // also draws the receiver object
-    this.ivMinionShadow.draw(camera);
-    this.ivLgtMinionShadow.draw(camera);
-    
-    this.ivBlock1.draw(camera);
-    this.ivIllumHero.draw(camera);
-    this.ivBlock2.draw(camera);  
-    this.ivLgtHero.draw(camera);
-    
-};
-
-// this is the draw function, make sure to setup proper drawing environment, and more
+// This is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
-    // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // draw with all three cameras
-    this.drawCamera(this.ivCamera);
-    this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
-    this.ivMatMsg.draw(this.ivCamera);
+    this.ivCamera.setupViewProjection();
+    
+    this.ivAllObjects.draw(this.ivCamera);
+    this.ivMsg.draw(this.ivCamera);
 };
 
-// the update function, updates the application state. make sure to _NOT_ draw
+// The Update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
+    
     this.ivCamera.update();  // to ensure proper interpolated movement effects
-
-    this.ivIllumMinion.update(); // ensure sprite animation
-    this.ivLgtMinion.update();
-
-    this.ivIllumHero.update();  // allow keyboard control to move
-    this.ivLgtHero.update();
-
-    // control the selected light
-    var msg = "L=" + this.ivLgtIndex + " ";
-    msg += this._lightControl();
-    this.ivMsg.setText(msg);
-
-    msg = this._selectCharacter();
-    msg += this.materialControl();
-    this.ivMatMsg.setText(msg);
-
+    this.ivAllObjects.update();  // updates everything
+ 
+    if (this.ivCamera.isMouseInViewport()) {
+        if (infinitEngine.Input.isButtonPressed(infinitEngine.Input.mouseButton.Left)) {
+            var x = this.ivCamera.mouseWCX();
+            var y = this.ivCamera.mouseWCY();
+            this.ivSelectedObj.getXform().setPosition(x, y);
+        }
+    }
+    
+    this._selectCharacter();
+    this._detectCollision();
+    
+    this.ivMsg.setText(this.kPrompt + this.ivEcho);
 };
 
 Demo.prototype._selectCharacter = function () {
     // select which character to work with
-    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Five)) {
-        this.ivSelectedCh = this.ivIllumMinion;
-        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
-        this.ivSelectedChMsg = "L:";
+    this.ivSelectedObj.setVisibility(true);
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.H)) {
+        this.ivSelectedObj = this.ivHero;
+        this.ivEcho = "Hero";
     }
-    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Six)) {
-        this.ivSelectedCh = this.ivIllumHero;
-        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
-        this.ivSelectedChMsg = "H:";
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.M)) {
+        this.ivSelectedObj = this.ivMinion;
+        this.ivEcho = "Minion";
     }
-    return this.ivSelectedChMsg;
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.P)) {
+        this.ivSelectedObj = this.ivPlatform;
+        this.ivEcho = "Platform";
+    }
+    this.ivSelectedObj.setVisibility(false);
+};
+
+Demo.prototype._detectCollision = function () {
+    
+    var i, obj;
+    this.ivCollidedObj = null;
+    var selectedRigidShape = this.ivSelectedObj.getPhysicsComponent();
+    for (i = 0; i<this.ivAllObjects.size(); i++) {
+        obj = this.ivAllObjects.getObjectAt(i);
+        if (obj !== this.ivSelectedObj) {
+            if (selectedRigidShape.collided(obj.getPhysicsComponent())) {
+                this.ivCollidedObj = obj;
+                this.ivCollidedObj.getPhysicsComponent().setColor(this.kCollideColor);
+            } else {
+                obj.getPhysicsComponent().setColor(this.kNormalColor);
+            }
+        }
+    }
 };
