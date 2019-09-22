@@ -13,6 +13,13 @@ function RigidShape(xform) {
     this.ivPositionMark = new LineRenderable();
     
     this.ivDrawBounds = false;
+
+    // physical properties
+    this.ivInvMass = 1;
+    this.ivRestitution = 0.8;
+    this.ivVelocity = vec2.fromValues(0, 0);
+    this.ivFriction = 0.3;
+    this.ivAcceleration = infinitEngine.Physics.getSystemtAcceleration();
 }
 
 RigidShape.prototype.rigidType = function () {
