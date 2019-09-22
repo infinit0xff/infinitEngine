@@ -1,18 +1,19 @@
 "use strict";
 
-function Hero(spriteTexture, normalMap, atX, atY) {
+function Hero(spriteTexture, atX, atY) {
     this.kDelta = 0.3;
-    if (normalMap !== null) {
-        this.ivDye = new IllumRenderable(spriteTexture, normalMap);
-    } else {
-        this.ivDye = new LightRenderable(spriteTexture);
-    }
+    this.ivDye = new SpriteRenderable(spriteTexture);
+
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(atX, atY);
     this.ivDye.getXform().setSize(18, 24);
-    this.ivDye.getXform().setZPos(5);
+    // this.ivDye.getXform().setZPos(5);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
+    var r = new RigidCircle(this.getXform(), 9);
+    r.setColor([0, 1, 0, 1]);
+    r.setDrawBounds(true);
+    this.setPhysicsComponent(r);
 }
 infinitEngine.Core.inheritPrototype(Hero, GameObject);
 
