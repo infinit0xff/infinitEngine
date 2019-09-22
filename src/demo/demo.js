@@ -1,9 +1,11 @@
 "use strict";
+
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
     this.kPlatformTexture = "assets/platform.png";
     this.kWallTexture = "assets/wall.png";
     this.kDyePackTexture = "assets/dye_pack.png";
+    this.kParticleTexture = "assets/particle.png";
     this.kPrompt = "RigidBody Physics!";
 
     // the camera to view the scene
@@ -18,9 +20,7 @@ function Demo() {
     this.ivAllPlatforms = new GameObjectSet();
     this.ivAllMinions = new GameObjectSet();
     this.ivAllDyePacks = new GameObjectSet();
-    
-    // for testing of stability
-    this.ivAllRigidShapes = new GameObjectSet();
+    this.ivAllParticles = new ParticleGameObjectSet();
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
@@ -29,6 +29,7 @@ Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kPlatformTexture);
     infinitEngine.Textures.loadTexture(this.kWallTexture);
     infinitEngine.Textures.loadTexture(this.kDyePackTexture);
+    infinitEngine.Textures.loadTexture(this.kParticleTexture);
 };
 
 Demo.prototype.unloadScene = function () {    
@@ -36,6 +37,7 @@ Demo.prototype.unloadScene = function () {
     infinitEngine.Textures.unloadTexture(this.kPlatformTexture);
     infinitEngine.Textures.unloadTexture(this.kWallTexture);
     infinitEngine.Textures.unloadTexture(this.kDyePackTexture);
+    infinitEngine.Textures.unloadTexture(this.kParticleTexture);
 };
 
 Demo.prototype.initialize = function () {
@@ -45,9 +47,8 @@ Demo.prototype.initialize = function () {
         200,                         // width of camera
         [0, 0, 1280, 720]            // viewport (orgX, orgY, width, height)
     );
-
-    // sets the background to gray
-    this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
+    this.ivCamera.setBackgroundColor([0.7, 0.7, 0.7, 1]);
+            // sets the background to gray
     
     infinitEngine.DefaultResources.setGlobalAmbientIntensity(3);
     
@@ -112,12 +113,12 @@ Demo.prototype.draw = function () {
     this.ivAllPlatforms.draw(this.ivCamera);
     this.ivAllMinions.draw(this.ivCamera);
     this.ivAllDyePacks.draw(this.ivCamera);
-    this.ivAllRigidShapes.draw(this.ivCamera);
     this.ivHero.draw(this.ivCamera);
+    this.ivAllParticles.draw(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);
 };
 
-// the Update function, updates the application state. Make sure to _NOT_ draw
+// the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
     
@@ -127,13 +128,21 @@ Demo.prototype.update = function () {
     this.ivAllMinions.update();
     this.ivHero.update(this.ivAllDyePacks);
     this.ivAllDyePacks.update();
-    this.ivAllRigidShapes.update();
+    this.ivAllParticles.update();
     
     // create dye pack and remove the expired ones ...
     if (infinitEngine.Input.isButtonClicked(infinitEngine.Input.mouseButton.Left)) {
         if (this.ivCamera.isMouseInViewport()) {
             var d = new DyePack(this.kDyePackTexture, this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
             this.ivAllDyePacks.addToSet(d);
+        }
+    }
+    
+    // create particles
+    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Z)) {
+        if (this.ivCamera.isMouseInViewport()) {
+            var p = this._createParticle(this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
+            this.ivAllParticles.addToSet(p);
         }
     }
     
@@ -149,5 +158,32 @@ Demo.prototype.update = function () {
     // physics simulation
     this._physicsSimulation();
     
-    this.ivMsg.setText(this.kPrompt + ": DyePack=" + this.ivAllDyePacks.size());
+    this.ivMsg.setText(this.kPrompt + ": DyePack=" + this.ivAllDyePacks.size() +
+            " Particles=" + this.ivAllParticles.size());
+};
+
+Demo.prototype._createParticle = function(atX, atY) {
+    var life = 30 + Math.random() * 200;
+    var p = new ParticleGameObject(this.kParticleTexture, atX, atY, life);
+    p.getRenderable().setColor([1, 0, 0, 1]);
+    
+    // size of the particle
+    var r = 5.5 + Math.random() * 0.5;
+    p.getXform().setSize(r, r);
+    
+    // final color
+    var fr = 3.5 + Math.random();
+    var fg = 0.4 + 0.1 * Math.random();
+    var fb = 0.3 + 0.1 * Math.random();
+    p.setFinalColor([fr, fg, fb, 0.6]);
+    
+    // velocity on the particle
+    var fx = 10 - 20 * Math.random();
+    var fy = 10 * Math.random();
+    p.getPhysicsComponent().setVelocity([fx, fy]);
+    
+    // size delta
+    p.setSizeDelta(0.98);
+    
+    return p;
 };
