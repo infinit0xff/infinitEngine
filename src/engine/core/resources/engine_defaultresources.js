@@ -45,6 +45,9 @@ infinitEngine.DefaultResources = (function() {
      var kShadowCasterFS = "src/glsl_shaders/shadow_caster_fs.glsl";  // Path to the FragmentShader
      var ivShadowCasterShader = null;
 
+     var kParticleFS = "src/glsl_shaders/particle_fs.glsl";
+     var ivParticleShader = null;
+     
     // default font
     var kDefaultFont = "assets/fonts/system-default-font";
     var getDefaultFont = function() { return kDefaultFont; };
@@ -58,6 +61,8 @@ infinitEngine.DefaultResources = (function() {
     var getIllumShader = function () { return ivIllumShader; };
     var getShadowReceiverShader = function () { return ivShadowReceiverShader; };
     var getShadowCasterShader = function () { return ivShadowCasterShader; };
+    var getParticleShader = function () { return ivParticleShader };
+
 
     // callback function after loadings are done
     var _createShaders = function(callBackFunction) {
@@ -70,6 +75,7 @@ infinitEngine.DefaultResources = (function() {
         ivIllumShader = new IllumShader(kTextureVS, kIllumFS);
         ivShadowReceiverShader = new SpriteShader(kTextureVS, kShadowReceiverFS);
         ivShadowCasterShader = new ShadowCasterShader(kTextureVS, kShadowCasterFS);
+        ivParticleShader = new TextureShader(kTextureVS, kParticleFS);
         callBackFunction();
     };
 
@@ -99,6 +105,9 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.loadTextFile(kShadowReceiverFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
         infinitEngine.TextFileLoader.loadTextFile(kShadowCasterFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
     
+        // particle shader
+        infinitEngine.TextFileLoader.loadTextFile(kParticleFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
+        
         // load default font
         infinitEngine.Fonts.loadFont(kDefaultFont);
 
@@ -116,6 +125,8 @@ infinitEngine.DefaultResources = (function() {
         ivIllumShader.cleanUp();
         ivShadowReceiverShader.cleanUp();
         ivShadowCasterShader.cleanUp();
+        ivParticleShader.cleanUp();
+
 
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleVS);
         infinitEngine.TextFileLoader.unloadTextFile(kSimpleFS);
@@ -137,6 +148,9 @@ infinitEngine.DefaultResources = (function() {
         infinitEngine.TextFileLoader.unloadTextFile(kShadowReceiverFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
         infinitEngine.TextFileLoader.unloadTextFile(kShadowCasterFS, infinitEngine.TextFileLoader.eTextFileType.eTextFile);
 
+         // particle shader
+        infinitEngine.TextFileLoader.unloadTextFile(kParticleFS);
+
         // default font
         infinitEngine.Fonts.unloadFont(kDefaultFont);
     };
@@ -151,6 +165,7 @@ infinitEngine.DefaultResources = (function() {
         getIllumShader: getIllumShader,
         getShadowReceiverShader: getShadowReceiverShader,
         getShadowCasterShader: getShadowCasterShader,
+        getParticleShader: getParticleShader,
         getDefaultFont: getDefaultFont,
         getGlobalAmbientColor: getGlobalAmbientColor,
         setGlobalAmbientColor: setGlobalAmbientColor,
