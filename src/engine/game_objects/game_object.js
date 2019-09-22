@@ -5,6 +5,7 @@ function GameObject(renderableObj) {
     this.ivVisible = true;
     this.ivCurrentFrontDir = vec2.fromValues(0, 1);  // this is the current front direction of the object
     this.ivSpeed = 0;
+    this.ivPhysicsComponent = null;
 }
 
 GameObject.prototype.getXform = function () { return this.ivRenderComponent.getXform(); };
@@ -25,6 +26,9 @@ GameObject.prototype.setCurrentFrontDir = function (f) { vec2.normalize(this.ivC
 GameObject.prototype.getCurrentFrontDir = function () { return this.ivCurrentFrontDir; };
 
 GameObject.prototype.getRenderable = function () { return this.ivRenderComponent; };
+
+GameObject.prototype.setPhysicsComponent = function (p) { this.ivPhysicsComponent = p; };
+GameObject.prototype.getPhysicsComponent = function () { return this.ivPhysicsComponent; };
 
 // orientate the entire object to point towards point p
 // will rotate Xform() accordingly
@@ -77,11 +81,18 @@ GameObject.prototype.update = function () {
     // simple default behavior
     var pos = this.getXform().getPosition();
     vec2.scaleAndAdd(pos, pos, this.getCurrentFrontDir(), this.getSpeed());
+    
+    if (this.ivPhysicsComponent !== null) {
+        this.ivPhysicsComponent.update();
+    }
 };
-
 
 GameObject.prototype.draw = function (aCamera) {
     if (this.isVisible()) {
         this.ivRenderComponent.draw(aCamera);
-    }};
+    }
+    if (this.ivPhysicsComponent !== null) {
+        this.ivPhysicsComponent.draw(aCamera);
+    }
+};
 
