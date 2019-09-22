@@ -10,7 +10,7 @@ function TextureShader(vertexShaderPath, fragmentShaderPath) {
     
     // reference to the uSampler, when using only texture, 
     // this is not necessary, with NormalMap, we must do this.
-    // this.ivSamplerRef = null;
+    this.ivSamplerRef = null;
 
     // get the reference of aTextureCoordinate within the shader
     var gl = infinitEngine.Core.getGL();
