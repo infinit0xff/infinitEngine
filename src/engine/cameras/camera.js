@@ -127,7 +127,7 @@ Camera.prototype.getVPMatrix = function() { return this.ivVPMatrix; };
         center = this.getWCCenter();
     }
     mat4.lookAt(this.ivViewMatrix,
-        [center[0], center[1], 10],   // WC center
+        [center[0], center[1], this.kCameraZ],   // WC center
         [center[0], center[1], 0],    // 
          // orientation
         [0, 1, 0]);
