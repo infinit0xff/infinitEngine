@@ -14,54 +14,54 @@ Demo.prototype._createALight = function (type, pos, dir, color, n, f, inner, out
     light.setOuter(outer);
     light.setIntensity(intensity);
     light.setDropOff(dropOff);
+    light.setLightCastShadowTo(true);
 
     return light;
 };
 
 Demo.prototype._initializeLights = function () {
     this.ivGlobalLightSet = new LightSet();
-
     var l = this._createALight(Light.eLightType.ePointLight,
-            [15, 50, 5],         // position
-            [0, 0, -1],          // Direction 
-            [0.6, 1.0, 0.0, 1],  // some color
-            8, 20,               // near and far distances
-            0.1, 0.2,            // inner and outer cones
-            5,                   // intensity
-            1.0                  // drop off
-            );
-    this.ivGlobalLightSet.addToSet(l);
+        [20, 25, 10],        // position
+        [0, 0, -1],          // direction 
+        [0.6, 1.0, 0.0, 1],  // some color
+        8, 20,               // near and far distances
+        0.1, 0.2,            // inner and outer cones
+        5,                   // intensity
+        1.0                  // drop off
+        );
+        this.ivGlobalLightSet.addToSet(l);
 
-    l = this._createALight(Light.eLightType.eDirectionalLight,
-            [15, 50, 4],           // position (not used by directional)
-            [-0.2, -0.2, -1],      // Pointing direction upwards
-            [0.7, 0.7, 0.0, 1],    // color
-            500, 500,              // near anf far distances: essentially switch this off
-            0.1, 0.2,              // inner and outer cones
-            2,                     // intensity
-            1.0                    // drop off
-            );
-    this.ivGlobalLightSet.addToSet(l);
+        l = this._createALight(Light.eLightType.eDirectionalLight,
+        [15, 50, 10],           // position (not used by directional)
+        [0.4, 0.4, -1],         // pointing direction 
+        [0.7, 0.7, 0.0, 1],     // color
+        500, 500,               // near anf far distances: essentially switch this off
+        0.1, 0.2,               // inner and outer cones
+        2,                      // intensity
+        1.0                     // drop off
+        );
+        this.ivGlobalLightSet.addToSet(l);
 
-    l = this._createALight(Light.eLightType.eSpotLight,
-            [80, 18, 10],            // Right minion position
-            [-0.07,  0, -1],     // direction
-            [0.5, 0.5, 0.5, 1],     // color
-            100, 100,                  // near and far distances
-            1.65, 1.7,               // inner outter angles (in radius)
-            5,                     // intensity
-            1.2                     // drop off
-            );
-    this.ivGlobalLightSet.addToSet(l);
+        l = this._createALight(Light.eLightType.eSpotLight,
+        [65, 25, 12],           // right minion position
+        [-0.02,  0.02, -1],     // direction
+        [0.5, 0.5, 0.5, 1],     // color
+        20, 40,                 // near and far distances
+        1.9, 2.0,               // inner outter angles (in radius)
+         5,                     // intensity
+        1.2                     // drop off
+        );
+        this.ivGlobalLightSet.addToSet(l);
 
-    l = this._createALight(Light.eLightType.eSpotLight,
-            [64, 43, 10],            // Center of camera 
-            [0.0, 0.03, -1],
-            [0.8, 0.8, 0.2, 1],      //  color
-            100, 100,                   // near and far distances
-            1.9, 2.0,                // inner and outer cones
-            2,                       // intensity
-            1                      // drop off
-            );
-    this.ivGlobalLightSet.addToSet(l);
+        l = this._createALight(Light.eLightType.eSpotLight,
+        [60, 50, 12],            // center of camera 
+        [0.02, -0.02, -1],
+        [0.8, 0.8, 0.2, 1],      //  color
+        20, 40,                  // near and far distances
+        1.2, 1.3,                // inner and outer cones
+        2,                       // intensity
+        1.5                      // drop off
+        );
+        this.ivGlobalLightSet.addToSet(l);
 };
