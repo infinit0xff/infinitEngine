@@ -2,190 +2,224 @@
 
 function Demo() {
     this.kMinionSprite = "assets/minion_sprite.png";
-    this.kPlatformTexture = "assets/platform.png";
-    this.kWallTexture = "assets/wall.png";
-    this.kDyePackTexture = "assets/dye_pack.png";
-    this.kParticleTexture = "assets/particle.png";
-    this.kPrompt = "RigidBody Physics!";
+    this.kMinionSpriteNormal = "assets/minion_sprite_normal.png";
+    this.kBg = "assets/bg.png";
+    this.kBgNormal = "assets/bg_normal.png";
+    this.kBgLayer = "assets/bgLayer.png";
+    this.kBgLayerNormal = "assets/bgLayer_normal.png";
 
-    // the camera to view the scene
+    // The camera to view the scene
     this.ivCamera = null;
+    this.ivHeroCam = null;
+    
+    this.ivBg = null;
+    this.ivBgL1 = null;
 
     this.ivMsg = null;
+    this.ivMatMsg = null;
 
     // the hero and the support objects
-    this.ivHero = null;
+    this.ivLgtHero = null;
+    this.ivIllumHero = null;
+
+    this.ivLgtMinion = null;
+    this.ivIllumMinion = null;
+
+    this.ivGlobalLightSet = null;
+
+    this.ivBlock1 = null;   // to verify swiitching between shaders is fine
+    this.ivBlock2 = null;
+
+    this.ivLgtIndex = 0;
+    this.ivLgtRotateTheta = 0;
     
-    this.ivCollidedObj = null;
-    this.ivAllPlatforms = new GameObjectSet();
-    this.ivAllMinions = new GameObjectSet();
-    this.ivAllDyePacks = new GameObjectSet();
-    this.ivAllParticles = new ParticleGameObjectSet();
+    // shadow support
+    this.ivBgShadow1 = null;
 }
 infinitEngine.Core.inheritPrototype(Demo, Scene);
 
 Demo.prototype.loadScene = function () {
     infinitEngine.Textures.loadTexture(this.kMinionSprite);
-    infinitEngine.Textures.loadTexture(this.kPlatformTexture);
-    infinitEngine.Textures.loadTexture(this.kWallTexture);
-    infinitEngine.Textures.loadTexture(this.kDyePackTexture);
-    infinitEngine.Textures.loadTexture(this.kParticleTexture);
+    infinitEngine.Textures.loadTexture(this.kBg);
+    infinitEngine.Textures.loadTexture(this.kBgNormal);
+    infinitEngine.Textures.loadTexture(this.kBgLayer);
+    infinitEngine.Textures.loadTexture(this.kBgLayerNormal);
+    infinitEngine.Textures.loadTexture(this.kMinionSpriteNormal);
 };
 
-Demo.prototype.unloadScene = function () {    
+Demo.prototype.unloadScene = function () {
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
-    infinitEngine.Textures.unloadTexture(this.kPlatformTexture);
-    infinitEngine.Textures.unloadTexture(this.kWallTexture);
-    infinitEngine.Textures.unloadTexture(this.kDyePackTexture);
-    infinitEngine.Textures.unloadTexture(this.kParticleTexture);
+    infinitEngine.Textures.unloadTexture(this.kBg);
+    infinitEngine.Textures.unloadTexture(this.kBgNormal);
+    infinitEngine.Textures.unloadTexture(this.kBgLayer);
+    infinitEngine.Textures.unloadTexture(this.kBgLayerNormal);
+    infinitEngine.Textures.unloadTexture(this.kMinionSpriteNormal);
 };
 
 Demo.prototype.initialize = function () {
-    // set up the cameras
-    this.ivCamera = new Camera(
-        vec2.fromValues(100, 56.25), // position of the camera
-        200,                         // width of camera
-        [0, 0, 1280, 720]            // viewport (orgX, orgY, width, height)
+    // Step A: set up the cameras
+    this.ivHeroCam = new Camera(
+        vec2.fromValues(20, 30.5), // position of the camera
+        14,                        // width of camera
+        [0, 420, 300, 300],        // viewport (orgX, orgY, width, height)
+        2
     );
-    this.ivCamera.setBackgroundColor([0.7, 0.7, 0.7, 1]);
+    this.ivHeroCam.setBackgroundColor([0.5, 0.5, 0.9, 1]);
+    
+    this.ivCamera = new Camera(
+        vec2.fromValues(50, 37.5), // position of the camera
+        100,                       // width of camera
+        [0, 0, 1280, 720]           // viewport (orgX, orgY, width, height)
+    );
+    this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
             // sets the background to gray
     
-    infinitEngine.DefaultResources.setGlobalAmbientIntensity(3);
+    // Step B: the lights
+    this._initializeLights();   // defined in Demo_Lights.js
+
+    // Step C: the far Background
+    var bgR = new IllumRenderable(this.kBg, this.kBgNormal);
+    bgR.setElementPixelPositions(0, 1024, 0, 1024);
+    bgR.getXform().setSize(30, 30);
+    bgR.getXform().setPosition(0, 0);
+    bgR.getMaterial().setSpecular([0.2, 0.1, 0.1, 1]);
+    bgR.getMaterial().setShininess(50);
+    bgR.getXform().setZPos(-20);
+    bgR.addLight(this.ivGlobalLightSet.getLightAt(1));   // only the directional light
+    this.ivBg = new TiledGameObject(bgR);
     
-    // create a few objects ...
-    var i, j, rx, ry, obj, dy, dx;
-    dx = 80;
-    ry = Math.random() * 5 + 20;
-    for (i = 0; i<4; i++) {
-        rx = 20 + Math.random() * 160;
-        obj = new Minion(this.kMinionSprite, rx, ry);
-        this.ivAllMinions.addToSet(obj);
-        
-        for (j=0; j<2; j++) {
-            rx = 20 + (j*dx) + Math.random() * dx;
-            dy = 10 * Math.random() - 5;
-            obj = new Platform(this.kPlatformTexture, rx, ry+dy);
-            this.ivAllPlatforms.addToSet(obj);
-        }
-        
-        ry = ry + 20 + Math.random() * 10;
+    // Step D: the closer Background
+    var i; 
+    var bgR1 = new IllumRenderable(this.kBgLayer, this.kBgLayerNormal);
+    bgR1.getXform().setSize(30, 30);
+    bgR1.getXform().setPosition(0, 0);
+    bgR1.getXform().setZPos(-10);
+    for (i = 0; i < 4; i++) {
+        bgR1.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
     }
-    
-    // the floor and ceiling
-    rx = -15;
-    for (i = 0; i<9; i++) {
-        obj = new Platform(this.kPlatformTexture, rx, 2);
-        this.ivAllPlatforms.addToSet(obj);
-        
-        obj = new Platform(this.kPlatformTexture, rx, 112);
-        this.ivAllPlatforms.addToSet(obj);
-        rx += 30;
-    }
-    
-    // the left and right walls
-    ry = 12;
-    for (i = 0; i<8; i++) {
-        obj = new Wall(this.kWallTexture, 5, ry);
-        this.ivAllPlatforms.addToSet(obj);
-        
-        obj = new Wall(this.kWallTexture, 195, ry);
-        this.ivAllPlatforms.addToSet(obj);
-        ry += 16;
-    }
+    bgR1.getMaterial().setSpecular([0.2, 0.2, 0.5, 1]);
+    bgR1.getMaterial().setShininess(10);
+    this.ivBgL1 = new TiledGameObject(bgR1);
+    this.ivBgL1.setSpeed(0.1);
+    this.ivBgL1.setCurrentFrontDir([-1, 0]);
     
     // 
-    // the important objects
-    this.ivHero = new Hero(this.kMinionSprite, 20, 30);   
-    
-    this.ivMsg = new FontRenderable(this.kPrompt);
-    this.ivMsg.setColor([0, 0, 0, 1]);
-    this.ivMsg.getXform().setPosition(10, 110);
+    // the objects
+    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 20, 30);
+    this.ivLgtHero = new Hero(this.kMinionSprite, null, 60, 50);
+    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 25, 30);
+    this.ivLgtMinion = new Minion(this.kMinionSprite, null, 65, 25);
+    for (i = 0; i < 4; i++) {
+        this.ivIllumHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
+        this.ivLgtHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
+        this.ivIllumMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
+        this.ivLgtMinion.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
+    }
+
+    this.ivMsg = new FontRenderable("Status Message");
+    this.ivMsg.setColor([1, 1, 1, 1]);
+    this.ivMsg.getXform().setPosition(4, 12);
     this.ivMsg.setTextHeight(3);
+
+    this.ivMatMsg = new FontRenderable("Status Message");
+    this.ivMatMsg.setColor([1, 1, 1, 1]);
+    this.ivMatMsg.getXform().setPosition(4, 64);
+    this.ivMatMsg.setTextHeight(3);
+
+    this.ivBlock1 = new Renderable();
+    this.ivBlock1.setColor([1, 0, 0, 1]);
+    this.ivBlock1.getXform().setSize(5, 5);
+    this.ivBlock1.getXform().setPosition(30, 50);
+
+    this.ivBlock2 = new Renderable();
+    this.ivBlock2.setColor([0, 1, 0, 1]);
+    this.ivBlock2.getXform().setSize(5, 5);
+    this.ivBlock2.getXform().setPosition(70, 50);
+
+    this.ivSelectedCh = this.ivIllumHero;
+    this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
+    this.ivSelectedChMsg = "H:";
+    
+    this._setupShadow();  // defined in Demo_Shadow.js
 };
 
-// this is the draw function, make sure to setup proper drawing environment, and more
+
+Demo.prototype.drawCamera = function (camera) {
+    // Step A: set up the View Projection matrix
+    camera.setupViewProjection();
+    // Step B: Now draws each primitive
+    
+    // always draw shadow first!
+    this.ivBg.draw(camera);
+    this.ivBgShadow1.draw(camera);
+
+    this.ivBlock1.draw(camera);
+    this.ivLgtMinion.draw(camera);
+    this.ivIllumMinion.draw(camera);
+    this.ivIllumHero.draw(camera);
+    this.ivBlock2.draw(camera);  
+    this.ivLgtHero.draw(camera);
+    
+};
+
+// This is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
+    // Step A: clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    this.ivCamera.setupViewProjection();
+    // Step  B: Draw with all cameras
+    this.drawCamera(this.ivCamera);
+    this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
+    this.ivMatMsg.draw(this.ivCamera);
     
-    this.ivAllPlatforms.draw(this.ivCamera);
-    this.ivAllMinions.draw(this.ivCamera);
-    this.ivAllDyePacks.draw(this.ivCamera);
-    this.ivHero.draw(this.ivCamera);
-    this.ivAllParticles.draw(this.ivCamera);
-    this.ivMsg.draw(this.ivCamera);
+    this.drawCamera(this.ivHeroCam);
 };
 
-// the update function, updates the application state. Make sure to _NOT_ draw
+// The Update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
-    
-    var func = function(x, y) { this.createParticle.call(this, x, y); };
-    
     this.ivCamera.update();  // to ensure proper interpolated movement effects
+    this.ivHeroCam.update();
     
-    this.ivAllPlatforms.update();
-    this.ivAllMinions.update();
-    this.ivHero.update(this.ivAllDyePacks, this.ivAllParticles, this.createParticle);
-    this.ivAllDyePacks.update();
-    this.ivAllParticles.update();
+    this.ivBgL1.update();
+
+    this.ivIllumMinion.update(); // ensure sprite animation
+    this.ivLgtMinion.update();
+
+    this.ivIllumHero.update();  // allow keyboard control to move
+    this.ivLgtHero.update();
+
+    var xf = this.ivIllumHero.getXform();
+    this.ivCamera.panWith(xf, 0.7);
+    this.ivGlobalLightSet.getLightAt(2).set2DPosition(xf.getPosition());
+    this.ivHeroCam.setWCCenter(xf.getXPos(), xf.getYPos());
+        
+    this.ivCamera.panWith(this.ivLgtHero.getXform(), 0.7);
+    this.ivGlobalLightSet.getLightAt(3).set2DPosition(this.ivLgtHero.getXform().getPosition());
     
-    // create dye pack and remove the expired ones ...
-    if (infinitEngine.Input.isButtonClicked(infinitEngine.Input.mouseButton.Left)) {
-        if (this.ivCamera.isMouseInViewport()) {
-            var d = new DyePack(this.kDyePackTexture, this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
-            this.ivAllDyePacks.addToSet(d);
-        }
-    }
-    
-    // create particles
-    if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Z)) {
-        if (this.ivCamera.isMouseInViewport()) {
-            var p = this.createParticle(this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
-            this.ivAllParticles.addToSet(p);
-        }
-    }
-    
-    // cleanup DyePacks
-    var i, obj;
-    for (i=0; i<this.ivAllDyePacks.size(); i++) {
-        obj = this.ivAllDyePacks.getObjectAt(i);
-        if (obj.hasExpired()) {
-            this.ivAllDyePacks.removeFromSet(obj);
-        }
-    }
-    
-    // physics simulation
-    this._physicsSimulation();
-    
-    this.ivMsg.setText(this.kPrompt + ": DyePack=" + this.ivAllDyePacks.size() +
-            " Particles=" + this.ivAllParticles.size());
+    // control the selected light
+    var msg = "L=" + this.ivLgtIndex + " ";
+    msg += this._lightControl();
+    this.ivMsg.setText(msg);
+
+    msg = this._selectCharacter();
+    msg += this.materialControl();
+    this.ivMatMsg.setText(msg);
+
 };
 
-Demo.prototype.createParticle = function(atX, atY) {
-    var life = 30 + Math.random() * 200;
-    var p = new ParticleGameObject("assets/particle.png", atX, atY, life);
-    p.getRenderable().setColor([1, 0, 0, 1]);
-    
-    // size of the particle
-    var r = 3.5 + Math.random() * 2.5;
-    p.getXform().setSize(r, r);
-    
-    // final color
-    var fr = 3.5 + Math.random();
-    var fg = 0.4 + 0.1 * Math.random();
-    var fb = 0.3 + 0.1 * Math.random();
-    p.setFinalColor([fr, fg, fb, 0.6]);
-    
-    // velocity on the particle
-    var fx = 10 * Math.random() - 20 * Math.random();
-    var fy = 10 * Math.random();
-    p.getPhysicsComponent().setVelocity([fx, fy]);
-    
-    // size delta
-    p.setSizeDelta(0.98);
-    
-    return p;
+Demo.prototype._selectCharacter = function () {
+    // select which character to work with
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Five)) {
+        this.ivSelectedCh = this.ivIllumMinion;
+        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
+        this.ivSelectedChMsg = "L:";
+    }
+    if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.Six)) {
+        this.ivSelectedCh = this.ivIllumHero;
+        this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
+        this.ivSelectedChMsg = "H:";
+    }
+    return this.ivSelectedChMsg;
 };
