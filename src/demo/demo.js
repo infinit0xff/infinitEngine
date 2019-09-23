@@ -8,12 +8,14 @@ function Demo() {
     this.kBgLayer = "assets/bgLayer.png";
     this.kBgLayerNormal = "assets/bgLayer_normal.png";
 
-    // The camera to view the scene
+    // the camera to view the scene
     this.ivCamera = null;
-    this.ivHeroCam = null;
+    this.ivParallaxCam = null;
+    this.ivShowHeroCam = false;
     
     this.ivBg = null;
     this.ivBgL1 = null;
+    this.ivFront = null;
 
     this.ivMsg = null;
     this.ivMatMsg = null;
@@ -57,57 +59,65 @@ Demo.prototype.unloadScene = function () {
 };
 
 Demo.prototype.initialize = function () {
-    // Step A: set up the cameras
-    this.ivHeroCam = new Camera(
-        vec2.fromValues(20, 30.5), // position of the camera
-        14,                        // width of camera
-        [0, 420, 300, 300],        // viewport (orgX, orgY, width, height)
+    // set up the cameras
+    this.ivParallaxCam = new Camera(
+        vec2.fromValues(25, 40), // position of the camera
+        30,                       // width of camera
+        [0, 420, 700, 300],           // viewport (orgX, orgY, width, height)
         2
     );
-    this.ivHeroCam.setBackgroundColor([0.5, 0.5, 0.9, 1]);
+    this.ivParallaxCam.setBackgroundColor([0.5, 0.5, 0.9, 1]);
     
     this.ivCamera = new Camera(
         vec2.fromValues(50, 37.5), // position of the camera
         100,                       // width of camera
         [0, 0, 1280, 720]           // viewport (orgX, orgY, width, height)
     );
+    // sets the background to gray
     this.ivCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
-            // sets the background to gray
     
-    // Step B: the lights
+    // the lights
     this._initializeLights();   // defined in Demo_Lights.js
 
-    // Step C: the far Background
+    // the far Background
     var bgR = new IllumRenderable(this.kBg, this.kBgNormal);
     bgR.setElementPixelPositions(0, 1024, 0, 1024);
     bgR.getXform().setSize(30, 30);
     bgR.getXform().setPosition(0, 0);
     bgR.getMaterial().setSpecular([0.2, 0.1, 0.1, 1]);
     bgR.getMaterial().setShininess(50);
-    bgR.getXform().setZPos(-20);
+    bgR.getXform().setZPos(-10);
     bgR.addLight(this.ivGlobalLightSet.getLightAt(1));   // only the directional light
-    this.ivBg = new TiledGameObject(bgR);
+    this.ivBg = new ParallaxGameObject(bgR, 5, this.ivCamera);
+    this.ivBg.setCurrentFrontDir([0, -1, 0]);
+    this.ivBg.setSpeed(0.1);
     
-    // Step D: the closer Background
+    // the closer Background
     var i; 
     var bgR1 = new IllumRenderable(this.kBgLayer, this.kBgLayerNormal);
-    bgR1.getXform().setSize(30, 30);
+    bgR1.getXform().setSize(25, 25);
     bgR1.getXform().setPosition(0, 0);
-    bgR1.getXform().setZPos(-10);
-    for (i = 0; i < 4; i++) {
-        bgR1.addLight(this.ivGlobalLightSet.getLightAt(i));   // all the lights
-    }
+    bgR1.getXform().setZPos(0); 
+    bgR1.addLight(this.ivGlobalLightSet.getLightAt(1));   // the directional light
+    bgR1.addLight(this.ivGlobalLightSet.getLightAt(2));   // the hero spotlight light
+    bgR1.addLight(this.ivGlobalLightSet.getLightAt(3));   // the hero spotlight light
     bgR1.getMaterial().setSpecular([0.2, 0.2, 0.5, 1]);
     bgR1.getMaterial().setShininess(10);
-    this.ivBgL1 = new TiledGameObject(bgR1);
+    this.ivBgL1 = new ParallaxGameObject(bgR1, 3, this.ivCamera);
+    this.ivBgL1.setCurrentFrontDir([0, -1, 0]);
     this.ivBgL1.setSpeed(0.1);
-    this.ivBgL1.setCurrentFrontDir([-1, 0]);
+    
+    // the front layer 
+    var f = new TextureRenderable(this.kBgLayer);
+    f.getXform().setSize(30, 30);
+    f.getXform().setPosition(0, 0);
+    this.ivFront = new ParallaxGameObject(f, 0.9, this.ivCamera);
     
     // 
     // the objects
-    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 20, 30);
-    this.ivLgtHero = new Hero(this.kMinionSprite, null, 60, 50);
-    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 25, 30);
+    this.ivIllumHero = new Hero(this.kMinionSprite, this.kMinionSpriteNormal, 40, 30);
+    this.ivLgtHero = new Hero(this.kMinionSprite, null, 60, 40);
+    this.ivIllumMinion = new Minion(this.kMinionSprite, this.kMinionSpriteNormal, 25, 40);
     this.ivLgtMinion = new Minion(this.kMinionSprite, null, 65, 25);
     for (i = 0; i < 4; i++) {
         this.ivIllumHero.getRenderable().addLight(this.ivGlobalLightSet.getLightAt(i));
@@ -118,12 +128,12 @@ Demo.prototype.initialize = function () {
 
     this.ivMsg = new FontRenderable("Status Message");
     this.ivMsg.setColor([1, 1, 1, 1]);
-    this.ivMsg.getXform().setPosition(4, 12);
+    this.ivMsg.getXform().setPosition(6, 15);
     this.ivMsg.setTextHeight(3);
 
     this.ivMatMsg = new FontRenderable("Status Message");
     this.ivMatMsg.setColor([1, 1, 1, 1]);
-    this.ivMatMsg.getXform().setPosition(4, 64);
+    this.ivMatMsg.getXform().setPosition(6, 65);
     this.ivMatMsg.setTextHeight(3);
 
     this.ivBlock1 = new Renderable();
@@ -145,9 +155,9 @@ Demo.prototype.initialize = function () {
 
 
 Demo.prototype.drawCamera = function (camera) {
-    // Step A: set up the View Projection matrix
+    // set up the View Projection matrix
     camera.setupViewProjection();
-    // Step B: Now draws each primitive
+    // now draws each primitive
     
     // always draw shadow first!
     this.ivBg.draw(camera);
@@ -160,29 +170,34 @@ Demo.prototype.drawCamera = function (camera) {
     this.ivBlock2.draw(camera);  
     this.ivLgtHero.draw(camera);
     
+    this.ivFront.draw(camera);
+    
 };
 
-// This is the draw function, make sure to setup proper drawing environment, and more
+// this is the draw function, make sure to setup proper drawing environment, and more
 // importantly, make sure to _NOT_ change any state.
 Demo.prototype.draw = function () {
-    // Step A: clear the canvas
+    // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // Step  B: Draw with all cameras
+    // draw with all cameras
     this.drawCamera(this.ivCamera);
     this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
     this.ivMatMsg.draw(this.ivCamera);
     
-    this.drawCamera(this.ivHeroCam);
+    if (this.ivShowHeroCam)
+        this.drawCamera(this.ivParallaxCam);
 };
 
-// The Update function, updates the application state. Make sure to _NOT_ draw
+// the update function, updates the application state. Make sure to _NOT_ draw
 // anything from this function!
 Demo.prototype.update = function () {
     this.ivCamera.update();  // to ensure proper interpolated movement effects
-    this.ivHeroCam.update();
+    this.ivParallaxCam.update();
     
     this.ivBgL1.update();
+    this.ivBg.update();
+    this.ivFront.update();
 
     this.ivIllumMinion.update(); // ensure sprite animation
     this.ivLgtMinion.update();
@@ -190,13 +205,16 @@ Demo.prototype.update = function () {
     this.ivIllumHero.update();  // allow keyboard control to move
     this.ivLgtHero.update();
 
-    var xf = this.ivIllumHero.getXform();
-    this.ivCamera.panWith(xf, 0.7);
+    var xf = this.ivLgtHero.getXform();
+    this.ivCamera.panWith(xf, 0.2);
+    this.ivGlobalLightSet.getLightAt(3).set2DPosition(xf.getPosition());
+    
+    xf = this.ivIllumHero.getXform();
     this.ivGlobalLightSet.getLightAt(2).set2DPosition(xf.getPosition());
-    this.ivHeroCam.setWCCenter(xf.getXPos(), xf.getYPos());
         
-    this.ivCamera.panWith(this.ivLgtHero.getXform(), 0.7);
-    this.ivGlobalLightSet.getLightAt(3).set2DPosition(this.ivLgtHero.getXform().getPosition());
+     if (infinitEngine.Input.isKeyClicked(infinitEngine.Input.keys.P)) {
+         this.ivShowHeroCam = !this.ivShowHeroCam;
+     }
     
     // control the selected light
     var msg = "L=" + this.ivLgtIndex + " ";
