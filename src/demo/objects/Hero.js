@@ -1,53 +1,34 @@
 "use strict";
 
-function Hero(spriteTexture, atX, atY) {
-    this.kXDelta = 1;
-    this.kYDelta = 2.0;
-    this.ivDye = new SpriteRenderable(spriteTexture);
+function Hero(spriteTexture, normalMap, atX, atY) {
+    this.kDelta = 0.3;
+    if (normalMap !== null) {
+        this.ivDye = new IllumRenderable(spriteTexture, normalMap);
+    } else {
+        this.ivDye = new LightRenderable(spriteTexture);
+    }
     this.ivDye.setColor([1, 1, 1, 0]);
     this.ivDye.getXform().setPosition(atX, atY);
-    this.ivDye.getXform().setSize(18, 24);
+    this.ivDye.getXform().setZPos(5);
+    this.ivDye.getXform().setSize(9, 12);
     this.ivDye.setElementPixelPositions(0, 120, 0, 180);
     GameObject.call(this, this.ivDye);
-    var r = new RigidRectangle(this.getXform(), 16, 22);
-    r.setMass(0.7);  // less dense than Minions
-    r.setRestitution(0.3);
-    r.setColor([0, 1, 0, 1]);
-    r.setDrawBounds(true);
-    this.setPhysicsComponent(r);
 }
 infinitEngine.Core.inheritPrototype(Hero, GameObject);
 
-Hero.prototype.update = function (dyePacks, allParticles, func) {
-    // must call super class update
-    GameObject.prototype.update.call(this);
-
+Hero.prototype.update = function () {
     // control by WASD
-    var v = this.getPhysicsComponent().getVelocity();
+    var xform = this.getXform();
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.W)) {
-        v[1] += this.kYDelta;
+        xform.incYPosBy(this.kDelta);
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.S)) {
-        v[1] -= this.kYDelta;
+        xform.incYPosBy(-this.kDelta);
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.A)) {
-        v[0] -= this.kXDelta;
+        xform.incXPosBy(-this.kDelta);
     }
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.D)) {
-        v[0] += this.kXDelta;
-    }
-    
-    // now interact with the dyePack ...
-    var i, obj, collisionPt = [0, 0];
-    
-    var p = this.getXform().getPosition();
-    for (i=0; i<dyePacks.size(); i++) {
-        obj = dyePacks.getObjectAt(i);
-        // chase after hero
-        obj.rotateObjPointTo(p, 0.8);
-        if (obj.pixelTouches(this, collisionPt)) {
-            dyePacks.removeFromSet(obj);
-            allParticles.addEmitterAt(collisionPt, 200, func);
-        }
+        xform.incXPosBy(this.kDelta);
     }
 };
