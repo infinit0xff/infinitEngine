@@ -68,3 +68,5 @@ FontRenderable.prototype.setFont = function (f) {
 
 FontRenderable.prototype.setColor = function (c) { this.ivOneChar.setColor(c); };
 FontRenderable.prototype.getColor = function () { return this.ivOneChar.getColor(); };
+
+FontRenderable.prototype.update = function () {};

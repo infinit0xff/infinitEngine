@@ -19,6 +19,8 @@ Renderable.prototype.draw = function(aCamera) {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
 
+Renderable.prototype.update = function () {};
+
 // getter setter for color instance var
 Renderable.prototype.getXform = function() { return this.ivXform; }
 Renderable.prototype.setColor = function(color) { this.ivColor = color; };
