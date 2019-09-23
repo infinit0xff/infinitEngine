@@ -122,11 +122,13 @@ Demo.prototype.draw = function () {
 // anything from this function!
 Demo.prototype.update = function () {
     
+    var func = function(x, y) { this.createParticle.call(this, x, y); };
+    
     this.ivCamera.update();  // to ensure proper interpolated movement effects
     
     this.ivAllPlatforms.update();
     this.ivAllMinions.update();
-    this.ivHero.update(this.ivAllDyePacks);
+    this.ivHero.update(this.ivAllDyePacks, this.ivAllParticles, this.createParticle);
     this.ivAllDyePacks.update();
     this.ivAllParticles.update();
     
@@ -141,7 +143,7 @@ Demo.prototype.update = function () {
     // create particles
     if (infinitEngine.Input.isKeyPressed(infinitEngine.Input.keys.Z)) {
         if (this.ivCamera.isMouseInViewport()) {
-            var p = this._createParticle(this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
+            var p = this.createParticle(this.ivCamera.mouseWCX(), this.ivCamera.mouseWCY());
             this.ivAllParticles.addToSet(p);
         }
     }
@@ -162,13 +164,13 @@ Demo.prototype.update = function () {
             " Particles=" + this.ivAllParticles.size());
 };
 
-Demo.prototype._createParticle = function(atX, atY) {
+Demo.prototype.createParticle = function(atX, atY) {
     var life = 30 + Math.random() * 200;
-    var p = new ParticleGameObject(this.kParticleTexture, atX, atY, life);
+    var p = new ParticleGameObject("assets/particle.png", atX, atY, life);
     p.getRenderable().setColor([1, 0, 0, 1]);
     
     // size of the particle
-    var r = 5.5 + Math.random() * 0.5;
+    var r = 3.5 + Math.random() * 2.5;
     p.getXform().setSize(r, r);
     
     // final color
@@ -178,7 +180,7 @@ Demo.prototype._createParticle = function(atX, atY) {
     p.setFinalColor([fr, fg, fb, 0.6]);
     
     // velocity on the particle
-    var fx = 10 - 20 * Math.random();
+    var fx = 10 * Math.random() - 20 * Math.random();
     var fy = 10 * Math.random();
     p.getPhysicsComponent().setVelocity([fx, fy]);
     
