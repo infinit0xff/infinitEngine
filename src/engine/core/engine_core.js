@@ -75,6 +75,8 @@ infinitEngine.Core = (function() {
 
         infinitEngine.AudioClips.initAudioContext();
         infinitEngine.Physics.initialize();
+        infinitEngine.LayerManager.initialize();
+
 
         // initialize default resources,
         // invoke startScene(demo) when done
