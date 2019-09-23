@@ -20,6 +20,11 @@ GameObjectSet.prototype.removeFromSet = function (obj) {
         this.ivSet.splice(index, 1);
 };
 
+GameObjectSet.prototype.moveToLast = function (obj) {
+    this.removeFromSet(obj);
+    this.addToSet(obj);
+};
+
 GameObjectSet.prototype.update = function () {
     var i;
     for (i = 0; i < this.ivSet.length; i++) {
