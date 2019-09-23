@@ -50,6 +50,7 @@ Demo.prototype.loadScene = function () {
 };
 
 Demo.prototype.unloadScene = function () {
+    infinitEngine.LayerManager.cleanUp();
     infinitEngine.Textures.unloadTexture(this.kMinionSprite);
     infinitEngine.Textures.unloadTexture(this.kBg);
     infinitEngine.Textures.unloadTexture(this.kBgNormal);
@@ -150,7 +151,23 @@ Demo.prototype.initialize = function () {
     this.ivMaterialCh = this.ivSelectedCh.getRenderable().getMaterial().getDiffuse();
     this.ivSelectedChMsg = "H:";
     
-    this._setupShadow();  // defined in Demo_Shadow.js
+    this._setupShadow();  // defined in demo_shadow.js
+
+    // add to layer managers ...
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eBackground, this.ivBg);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eShadowReceiver, this.ivBgShadow1);
+    
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eActors, this.ivIllumMinion);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eActors, this.ivLgtMinion);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eActors, this.ivIllumHero);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eActors, this.ivLgtHero);
+    
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eFront, this.ivBlock1);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eFront, this.ivBlock2);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eFront, this.ivFront);
+    
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eHUD, this.ivMsg);
+    infinitEngine.LayerManager.addToLayer(infinitEngine.eLayer.eHUD, this.ivMatMsg);
 };
 
 
@@ -180,13 +197,13 @@ Demo.prototype.draw = function () {
     // clear the canvas
     infinitEngine.Core.clearCanvas([0.9, 0.9, 0.9, 1.0]); // clear to light gray
 
-    // draw with all cameras
-    this.drawCamera(this.ivCamera);
-    this.ivMsg.draw(this.ivCamera);   // only draw status in the main camera
-    this.ivMatMsg.draw(this.ivCamera);
-    
-    if (this.ivShowHeroCam)
-        this.drawCamera(this.ivParallaxCam);
+    this.ivCamera.setupViewProjection();
+    infinitEngine.LayerManager.drawAllLayers(this.ivCamera);
+
+    if (this.ivShowHeroCam) {
+        this.ivParallaxCam.setupViewProjection();
+        infinitEngine.LayerManager.drawAllLayers(this.ivParallaxCam);
+    }
 };
 
 // the update function, updates the application state. Make sure to _NOT_ draw
@@ -194,17 +211,9 @@ Demo.prototype.draw = function () {
 Demo.prototype.update = function () {
     this.ivCamera.update();  // to ensure proper interpolated movement effects
     this.ivParallaxCam.update();
+
+    infinitEngine.LayerManager.updateAllLayers();
     
-    this.ivBgL1.update();
-    this.ivBg.update();
-    this.ivFront.update();
-
-    this.ivIllumMinion.update(); // ensure sprite animation
-    this.ivLgtMinion.update();
-
-    this.ivIllumHero.update();  // allow keyboard control to move
-    this.ivLgtHero.update();
-
     var xf = this.ivLgtHero.getXform();
     this.ivCamera.panWith(xf, 0.2);
     this.ivGlobalLightSet.getLightAt(3).set2DPosition(xf.getPosition());
